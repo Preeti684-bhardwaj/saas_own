@@ -1,0 +1,55 @@
+const env = require('./dbenv.js');
+
+const Sequelize = require('sequelize');
+const sequelize = new Sequelize(env.database, env.username, env.password, {
+  host: env.host,
+  dialect: env.dialect,
+  operatorsAliases: false,
+
+  pool: {
+    max: env.pool.max,
+    min: env.pool.min,
+    acquire: env.pool.acquire,
+    idle: env.pool.idle
+  }
+});
+
+const db = {};
+
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
+
+db.customers = require('../models/customerModel.js')(sequelize, Sequelize);
+db.admins = require('../models/adminModel.js')(sequelize, Sequelize);
+db.products = require('../models/productModel.js')(sequelize, Sequelize);
+db.subscriptionPlans = require('../models/subscriptionPlanModel.js')(sequelize, Sequelize);
+db.subscriptions = require('../models/subscriptionModel.js')(sequelize, Sequelize);
+db.orders = require('../models/orderModel.js')(sequelize, Sequelize);
+db.transactions = require('../models/transactionModel.js')(sequelize, Sequelize);
+
+// Relationships
+db.products.hasMany(db.subscriptionPlans, { as: 'subscriptionPlans' });
+db.subscriptionPlans.belongsTo(db.products, {
+    foreignKey: 'productId',
+    as: 'product'
+});
+
+db.customers.hasMany(db.subscriptions, { as: 'subscriptions' });
+db.subscriptions.belongsTo(db.customers, {
+    foreignKey: 'customerId',
+    as: 'customer'
+});
+
+db.customers.hasMany(db.orders, { as: 'orders' });
+db.orders.belongsTo(db.customers, {
+    foreignKey: 'userId',
+    as: 'customer'
+});
+
+db.orders.hasMany(db.transactions, { foreignKey: 'orderId', as: 'transactions' });
+db.transactions.belongsTo(db.orders, {
+    foreignKey: 'orderId',
+    as: 'order'
+});
+
+module.exports = db;
