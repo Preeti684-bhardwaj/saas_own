@@ -13,12 +13,12 @@ const createSubscriptionPlan = asyncHandler(async (req, res,next) => {
   }
 
   const { frequency, price, productId } = req.body;
-  const existingPlanFrequency = await SubscriptionPlan.findOne({
-    where: { frequency: frequency},
-  });
-  if (existingPlanFrequency) {
-    return next(new errorHandler("frequency already exist", 400));
-  }
+  // const existingPlanFrequency = await SubscriptionPlan.findOne({
+  //   where: { frequency: frequency},
+  // });
+  // if (existingPlanFrequency) {
+  //   return next(new errorHandler("frequency already exist", 400));
+  // }
 
   const transaction = await db.sequelize.transaction();
 
