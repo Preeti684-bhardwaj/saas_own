@@ -88,6 +88,15 @@ const productValidation = [
     body('features').notEmpty().withMessage('Features is required'),
     body('media').optional().isObject().withMessage('Media must be a valid JSON object')
 ];
+
+
+const validateProductUpdate = [
+  param('id').isUUID().withMessage('Must provide a valid ID'),
+  body('name').optional(),
+  body('description').optional(),
+  body('media').optional().isObject().withMessage('Media must be a valid JSON object')
+];
+
 // ----------------------SUBSCRIPTION VALIDATION-----------------------------------------------------------------
 const validateSubscriptionPlanCreation = [
     body('frequency').notEmpty().withMessage('Frequency is required'),
@@ -124,6 +133,7 @@ module.exports = {
   validateDeleteAdmin,
   // ===============================
   productValidation,
+  validateProductUpdate,
 //   ===============================
 validateSubscriptionPlanCreation,
 // --------------------------------
