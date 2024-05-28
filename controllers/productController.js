@@ -140,7 +140,7 @@ const updateProduct = async (req, res) => {
 // Delete a Product with the specified id in the request
 const deleteProduct = async (req, res) => {
   const id = req.params.id;
-
+console.log(id);
   try {
     const num = await Product.destroy({ where: { id: id } });
     if (num == 1) {
