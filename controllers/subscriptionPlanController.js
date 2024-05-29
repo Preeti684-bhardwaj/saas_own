@@ -57,7 +57,7 @@ const createSubscriptionPlan = asyncHandler(async (req, res,next) => {
 const subsFindAll = async (req, res) => {
   const { page, size, productId } = req.query;
   const condition = productId ? { productId: productId } : null;
-  const limit = size ? +size : 10; // default size
+  const limit = size ? +size : 14; // default size
   const offset = page ? page * limit : 0;
 
   try {
@@ -72,6 +72,31 @@ const subsFindAll = async (req, res) => {
       res.status(500).send({
           message: error.message || "Some error occurred while retrieving subscription plans."
       });
+  }
+};
+// find subsplan through frequency
+const FindByFrequency = async (req, res) => {
+  const { frequency } = req.body; // Extract frequency from request body
+
+  try {
+    const subscriptionPlans = await SubscriptionPlan.findAll({
+      where: {
+        frequency: frequency
+      }
+    });
+
+    if (subscriptionPlans.length > 0) {
+      res.status(200).send(subscriptionPlans);
+    } else {
+      res.status(404).send({
+        message: `Cannot find any Subscription Plan with frequency=${frequency}.`
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      message: "Error retrieving Subscription Plans with frequency=" + frequency,
+      error: error.message
+    });
   }
 };
 
@@ -99,6 +124,7 @@ const subsFindOne = async (req, res) => {
 
 module.exports={
     createSubscriptionPlan,
+    FindByFrequency,
     subsFindAll,
     subsFindOne
 
