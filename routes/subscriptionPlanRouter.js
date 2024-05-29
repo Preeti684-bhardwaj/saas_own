@@ -8,5 +8,5 @@ router.post('/createSubsPlan',authenticate,authorize(['ADMIN']),validateSubscrip
 router.get('/getAllSubsplan',authenticate,authorize(['ADMIN','CUSTOMER']),subsFindAll)
 router.get('/getByIdSubsplan/:id',authenticate,authorize(['ADMIN','CUSTOMER']),subsFindOne)
 router.get('/getByFrequency',FindByFrequency)
-router.delete('/deletePlanById/:id',deletePlanById)
+router.delete('/deletePlanById/:id',authenticate,authorize(['ADMIN']),deletePlanById)
 module.exports = router;

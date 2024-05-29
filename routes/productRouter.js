@@ -6,8 +6,9 @@ const {productValidation,validateProductUpdate} = require('../utils/validation')
 
 router.post('/createProduct',authenticate,authorize(['ADMIN']),productValidation,createProduct);
 router.get('/with-subscription-plans',authenticate,authorize(['ADMIN','CUSTOMER']), findAllWithSubscriptionPlans);
+
 // Retrieve a single Product with id
-router.get('/getOne/:id',authenticate,authorize(['ADMIN']), findOneProduct);
+router.get('/getOne/:id', findOneProduct);
 
 // Update a Product with id
 router.put('/update/:id',authenticate,authorize(['ADMIN']), validateProductUpdate,updateProduct);

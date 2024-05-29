@@ -82,7 +82,13 @@ const FindByFrequency = async (req, res) => {
     const subscriptionPlans = await SubscriptionPlan.findAll({
       where: {
         frequency: frequency
-      }
+      },
+      include: [
+        {
+          model: db.products,
+          as: "product", // Use the correct association alias
+        },
+      ],
     });
 
     if (subscriptionPlans.length > 0) {
