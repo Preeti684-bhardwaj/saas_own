@@ -120,12 +120,36 @@ const subsFindOne = async (req, res) => {
   }
 };
 
+// Delete a Subscription Plan with the specified id in the request
+const deletePlanById = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+      const num = await SubscriptionPlan.destroy({ where: { id: id } });
+      if (num == 1) {
+          res.send({
+              message: "Subscription Plan was deleted successfully!"
+          });
+      } else {
+          res.send({
+              message: `Cannot delete Subscription Plan with id=${id}. Maybe Subscription Plan was not found!`
+          });
+      }
+  } catch (error) {
+      res.status(500).send({
+          message: "Could not delete Subscription Plan with id=" + id
+      });
+  }
+};
+
+
 
 
 module.exports={
     createSubscriptionPlan,
     FindByFrequency,
     subsFindAll,
-    subsFindOne
+    subsFindOne,
+    deletePlanById
 
 }
