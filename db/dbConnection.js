@@ -25,7 +25,7 @@ db.products = require('../models/productModel.js')(sequelize, Sequelize);
 db.subscriptionPlans = require('../models/subscriptionPlanModel.js')(sequelize, Sequelize);
 db.subscriptions = require('../models/subscriptionModel.js')(sequelize, Sequelize);
 db.orders = require('../models/orderModel.js')(sequelize, Sequelize);
-db.transactions = require('../models/transactionModel.js')(sequelize, Sequelize);
+// db.transactions = require('../models/transactionModel.js')(sequelize, Sequelize);
 
 // Relationships
 db.products.hasMany(db.subscriptionPlans, { as: 'subscriptionPlans' });
@@ -46,10 +46,10 @@ db.orders.belongsTo(db.customers, {
     as: 'customer'
 });
 
-db.orders.hasMany(db.transactions, { foreignKey: 'orderId', as: 'transactions' });
-db.transactions.belongsTo(db.orders, {
-    foreignKey: 'orderId',
-    as: 'order'
-});
+// db.orders.hasMany(db.transactions, { foreignKey: 'orderId', as: 'transactions' });
+// db.transactions.belongsTo(db.orders, {
+//     foreignKey: 'orderId',
+//     as: 'order'
+// });
 
 module.exports = db;

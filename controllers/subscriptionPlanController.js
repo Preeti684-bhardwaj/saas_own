@@ -76,7 +76,7 @@ const subsFindAll = async (req, res) => {
 };
 // find subsplan through frequency
 const FindByFrequency = async (req, res) => {
-  const { frequency } = req.body; // Extract frequency from request body
+  const { frequency } = req.query; // Extract frequency from request body
 
   try {
     const subscriptionPlans = await SubscriptionPlan.findAll({
