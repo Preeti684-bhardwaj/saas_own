@@ -5,7 +5,6 @@ module.exports = (sequelize, Sequelize) => {
             primaryKey: true,
             defaultValue: Sequelize.UUIDV4
         },
-        userId:Sequelize.STRING,
         StripeCustomerId:Sequelize.STRING,
         date: Sequelize.DATE,
         invoiceNumber: Sequelize.STRING,

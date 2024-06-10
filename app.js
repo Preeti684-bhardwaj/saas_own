@@ -28,9 +28,9 @@ app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/subscription", subscriptionRouter);
 app.use("/api/v1/subscription_plan", subscriptionPlanRouter);
-// app.use("/api/v1/order", orderRouter);
 app.use("/api/v1/stripe", stripePaymentRouter);
 // app.use("/api/stripe/webhook", stripeWebhookRouter);
+// app.use("/success", orderRouter);
 
 // Middleware for error
 app.use(errorMiddleware);

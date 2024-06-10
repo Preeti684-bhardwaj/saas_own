@@ -1,30 +1,23 @@
-// const { Subscription} = require('../models/subscriptionModel');
-// const {SubscriptionPlan} =require ('../models/subscriptionPlanModel');
-// const {Customer} =require ('../models/customerModel')
-// const asyncHandler = require('../utils/asyncHandler');
-// const errorHandler = require('../utils/errorHandler');
-
-const { Sequelize } = require('sequelize');
 const db = require('../db/dbConnection');
-const Subscription = require('../models/subscriptionModel');
+const Subscription = db.subscriptions
 const calculateEndDate = require('../utils/endDateConfigure');
 const asyncHandler = require('../utils/asyncHandler');
 
-const createOrUpdateSubscription = asyncHandler(async (userId, planId, duration) => {
+// stripe webhook data of subscription of customer
+const createSubscription = asyncHandler(async (userId, frequency , price) => {
   const transaction = await db.sequelize.transaction();
-
   try {
     const startDate = new Date();
-    const endDate = calculateEndDate(startDate, duration);
+    const endDate = calculateEndDate(startDate, frequency);
 
     const subscription = await Subscription.create({
-      userId,
-      planId,
-      status: 'active',
+      customerId:userId,
+      frequency,
+      // status: 'active',
       startDate,
       endDate,
-      duration,
-    }, { transaction });
+      price:price/100,
+    },{transaction});
 
     await transaction.commit();
     console.log('Subscription created or updated successfully:', subscription);
@@ -36,16 +29,12 @@ const createOrUpdateSubscription = asyncHandler(async (userId, planId, duration)
   }
 });
 
-module.exports = {
-  createOrUpdateSubscription,
-};
-
-
+// subscription through other way
 // const createSubscription = asyncHandler(async (req, res, next) => {
-//     const { customerId, subscriptionPlanId, startDate, endDate } = req.body;
+  //     const { customerId, subscriptionPlanId, startDate, endDate } = req.body;
 
-//     if (!customerId || !subscriptionPlanId) {
-//         return next(new errorHandler("Customer ID and Subscription Plan ID are required", 400));
+  //     if (!customerId || !subscriptionPlanId) {
+    //         return next(new errorHandler("Customer ID and Subscription Plan ID are required", 400));
 //     }
 
 //     try {
@@ -57,20 +46,20 @@ module.exports = {
 //         }
 
 //         const subscription = await Subscription.create({
-//             customerId,
-//             subscriptionPlanId,
-//             startDate: startDate || new Date(),
-//             endDate: endDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-//             status: 'active'
-//         });
-
-//         res.status(201).json(subscription);
-//     } catch (error) {
+  //             customerId,
+  //             subscriptionPlanId,
+  //             startDate: startDate || new Date(),
+  //             endDate: endDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+  //             status: 'active'
+  //         });
+  
+  //         res.status(201).json(subscription);
+  //     } catch (error) {
 //         console.error("Error creating subscription:", error);
 //         return next(new errorHandler("Error creating subscription", 500));
 //     }
 // });
 
-// module.exports = {
-//     createSubscription
-// };
+module.exports = {
+  createSubscription,
+};

@@ -2,21 +2,20 @@ const Stripe = require('stripe');
 const dotenv = require('dotenv').config();
 const asyncHandler = require('../utils/asyncHandler');
 const errorHandler = require('../utils/errorHandler');
-const { Order } = require('../models/orderModel');
-const { Transaction } = require('../models/transactionModel');
+const { json } = require('sequelize');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const stripePayment = asyncHandler(async (req, res, next) => {
-    const customer = await stripe.customers.create({
-        metadata:{
-            userId:req.body.userId,
-            planName:req.body.planName,
-            frequency:req.body.frequency,
-            planPrice:req.body.planPrice
-        }
-    })
-    console.log("hello line 19",customer);
+    // const customer = await stripe.customers.create({
+    //     metadata:{
+    //         userId:req.body.userId,
+    //         planName:req.body.planName,
+    //         frequency:req.body.frequency,
+    //         planPrice:req.body.planPrice
+    //     }
+    // })
+    // console.log("hello line 19",customer);
   try {
     const {
       userName,
@@ -55,7 +54,7 @@ const stripePayment = asyncHandler(async (req, res, next) => {
     const session = await stripe.checkout.sessions.create({
       billing_address_collection: 'auto',
       payment_method_types: ['card'],
-    //   customer_email: userName,
+      customer_email: req.body.userName,
       line_items: [
         {
           price_data: {
@@ -76,14 +75,14 @@ const stripePayment = asyncHandler(async (req, res, next) => {
         planName: planName,
         frequency:frequency,
         features:featuresString,
-        // userId: userId,
+        userId: userId,
       },
-      customer:customer.id,
+      // customer:customer.id,
       mode: 'payment',
       success_url: `https://new-video-editor.vercel.app/listings?session_id={CHECKOUT_SESSION_ID}&accessToken=${accessToken}`,
-      cancel_url: 'https://subscription-saa-s-ui.vercel.app/checkoutFail',
+      cancel_url: 'https://subscription-saa-s-ui.vercel.app/',
     });
-    // console.log(session);
+    console.log("session leke aaya hu",session);
     res.send({ url: session.url });
   } catch (error) {
     console.error('Stripe payment error:', error);

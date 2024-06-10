@@ -1,11 +1,84 @@
-// const db = require("../db/dbConnection");
-// const Order = db.orders;
-// const asyncHandler = require("../utils/asyncHandler");
+const db = require("../db/dbConnection");
+const Order = db.orders;
+// const Stripe = require('stripe');
+const asyncHandler = require("../utils/asyncHandler");
+const dotenv = require('dotenv').config();
+// const Customer=db.customers
 // const errorHandler = require("../utils/errorHandler");
 // const Subscription =db.subscriptions;
 // const calculateEndDate = require('../utils/endDateConfigure');
+// const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// // createOrder
+// createOrder
+const createOrder = asyncHandler(async (customer, data) => {
+  const transaction = await db.sequelize.transaction();
+  try {
+    const order = await Order.create({
+      customerId: customer.metadata.userId,
+      StripeCustomerId: data.customer,
+      date: new Date(),
+      invoiceNumber: data.invoice,
+      subscription: data.metadata,
+      payment: {
+        intentId: data.payment_intent,
+        status: data.payment_status,
+        amount: data.amount_total / 100,
+        currency: data.currency,
+        method: data.payment_method_types[0],
+      },
+      status: data.status,
+    },{ transaction });
+    console.log("Order created successfully:", order);
+    await transaction.commit();
+    return order;
+  } catch (error) {
+    await transaction.rollback();
+    console.error("Error creating order:", error);
+    throw new Error("Error creating order");
+  }
+});
+
+// const orderDetails = async (req, res) => {
+//   let { session_id } = req.query;
+//   console.log(session_id);
+//   try {
+//     const session = await stripe.checkout.sessions.retrieve(session_id);
+// console.log("session hu order file se", session);
+//     const transaction = await db.sequelize.transaction();
+//     try {
+//       const order = await Order.create({
+//         customerId: session.metadata.userId,
+//         StripeCustomerId: session.id,
+//         date: new Date(),
+//         invoiceNumber: session.invoice, // Assuming invoice is in metadata
+//         subscription: session.metadata,
+//         payment: {
+//           intentId: session.payment_intent,
+//           status: session.payment_status,
+//           amount: session.amount_total / 100,
+//           currency: session.currency,
+//           method: session.payment_method_types[0],
+//         },
+//         status: session.status,
+//       }, { transaction });
+//       console.log("Order created successfully:", order);
+//       await transaction.commit();
+//       res.json(order);
+//     } catch (error) {
+//       await transaction.rollback();
+//       console.error("Error creating order:", error);
+//       res.status(500).json({ error: "Error creating order" });
+//     }
+//   } catch (err) {
+//     console.log("Something went wrong", err.message);
+//     res.status(500).json({ error: "Failed to retrieve session" });
+//   }
+// };
+
+module.exports = {
+  // orderDetails,
+  createOrder
+};
 
 // const createOrder = asyncHandler(async (customer, data) => {
 //   const transaction = await db.sequelize.transaction();
@@ -90,33 +163,4 @@
 //     console.error('Error handling pending payment:', error);
 //     throw error;
 //   }
-// };
-
-// // const createOrder = asyncHandler(async (customer, data) => {
-// //   try {
-// //     const order = await Order.create({
-// //       userId: customer.metadata.userId,
-// //       StripeCustomerId: data.customer,
-// //       date: new Date(),
-// //       invoiceNumber: data.invoice,
-// //       subscription: data.metadata,
-// //       payment: {
-// //         intentId: data.payment_intent,
-// //         status: data.payment_status,
-// //         amount: data.amount_total / 100,
-// //         currency: data.currency,
-// //         method: data.payment_method_types[0],
-// //       },
-// //       status: data.status,
-// //     });
-// //     console.log("Order created successfully:", order);
-// //     return order;
-// //   } catch (error) {
-// //     console.error("Error creating order:", error);
-// //     throw new Error("Error creating order");
-// //   }
-// // });
-
-// module.exports = {
-//   createOrder,
 // };

@@ -9,9 +9,9 @@
 
 // // = process.env.STRIPE_WEBHOOK_SECRET;
 
-// // Checkout session 
+// Checkout session order data 
 // router.post("/create-checkout-session", stripePayment);
-// router.get("/get-session", getSessionDetails);
+// router.get("/", getSessionDetails);
 
 // const createOrder = async (customer, data) => {
 //   try {
