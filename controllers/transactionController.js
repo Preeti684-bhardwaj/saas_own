@@ -6,7 +6,7 @@ const createTransaction = async (data) => {
     try {
         // Find the order using the payment_intent
         const order = await Order.findOne({ where: { 'payment.intentId': data.payment_intent } });
-
+console.log(data.payment_intent);
         if (!order) {
             throw new Error('Order not found for the given payment intent');
         }
