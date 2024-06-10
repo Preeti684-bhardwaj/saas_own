@@ -61,12 +61,12 @@ router.post("/hook",express.raw({ type: "application/json" }),
           // console.log("customer",customer);
           // console.log("data", data);
           createOrder(customer, data);
+          createTransaction(data);
           createSubscription(
             data.metadata.userId,
             data.metadata.frequency,
              data.amount_total
           );
-          createTransaction(data);
         })
         .catch((err) => console.log(err.message));
     }
