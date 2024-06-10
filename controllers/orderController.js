@@ -10,7 +10,7 @@ const dotenv = require('dotenv').config();
 // const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // createOrder
-const createOrder = asyncHandler(async (customer, data) => {
+const createOrder = async (customer, data) => {
   const transaction = await db.sequelize.transaction();
   try {
     const order = await Order.create({
@@ -36,7 +36,7 @@ const createOrder = asyncHandler(async (customer, data) => {
     console.error("Error creating order:", error);
     throw new Error("Error creating order");
   }
-});
+};
 
 // const orderDetails = async (req, res) => {
 //   let { session_id } = req.query;
