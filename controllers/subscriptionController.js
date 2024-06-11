@@ -47,7 +47,7 @@ const getSubscription = asyncHandler(async (req, res) => {
     // e.g., req.user = { id: verifiedUserId };
 
     // Fetch the subscription from the database
-    const subscription = await Subscription.findOne({
+    const subscription = await Subscription.findAll({
       where: { customerId: userId }
     });
 
