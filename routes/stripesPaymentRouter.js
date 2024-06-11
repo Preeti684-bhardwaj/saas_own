@@ -21,18 +21,19 @@ router.get("/get-session", getSessionDetails);
 // router.get('/success', orderDetails);
 
 // Setup webhook
-router.post("/hook",express.raw({ type: "application/json" }),
-  async (req, res) => {
-    const sig = req.headers["stripe-signature"];
-    let data;
-    let eventType;
+router.post("/hook", express.raw({ type: "application/json" }), async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  let data;
+  let eventType;
+
+  try {
     if (endpointSecret) {
       let event;
       try {
         event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
       } catch (err) {
-        res.status(400).send(`Webhook Error: ${err.message}`);
-        return;
+        console.error(`Webhook Error: ${err.message}`);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
       }
       data = event.data.object;
       eventType = event.type;
@@ -40,39 +41,24 @@ router.post("/hook",express.raw({ type: "application/json" }),
       data = req.body.data.object;
       eventType = req.body.type;
     }
-    // Handle the event
-
-    // if (eventType =="checkout.session.async_payment_failed")
-    //  {
-    //   stripe.customers
-    //     .retrieve(data.customer)
-    //     .then((customer) => {
-    //       console.log("transaction pending ya fail",customer);
-    //       console.log("data transaction", data);
-    //       createTransaction(data, customer);
-    //     })
-    //     .catch((err) => console.log(err.message));
-    // }
 
     if (eventType === "checkout.session.completed") {
-      stripe.customers
-        .retrieve(data.customer)
-        .then((customer) => {
-          // console.log("customer",customer);
-          // console.log("data", data);
-          createOrder(customer, data);
-          createTransaction(data);
-          createSubscription(
-            data.metadata.userId,
-            data.metadata.frequency,
-             data.amount_total
-          );
-        })
-        .catch((err) => console.log(err.message));
+      try {
+        const customer = await stripe.customers.retrieve(data.customer);
+        await createOrder(customer, data);
+        await createTransaction(data);
+        await createSubscription(data.metadata.userId, data.metadata.frequency, data.amount_total);
+      } catch (err) {
+        console.error(err.message);
+        return res.status(500).send(`Internal Server Error: ${err.message}`);
+      }
     }
-    // Return a 200 response to acknowledge receipt of the event
-    res.send();
+
+    res.status(200).send(); // Acknowledge receipt of the event
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send(`Internal Server Error: ${err.message}`);
   }
-);
+});
 
 module.exports = router;

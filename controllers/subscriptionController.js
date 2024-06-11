@@ -4,7 +4,7 @@ const calculateEndDate = require('../utils/endDateConfigure');
 const asyncHandler = require('../utils/asyncHandler');
 
 // stripe webhook data of subscription of customer
-const createSubscription = asyncHandler(async (userId, frequency , price) => {
+const createSubscription = async (userId, frequency , price) => {
   const transaction = await db.sequelize.transaction();
   try {
     const startDate = new Date();
@@ -26,6 +26,39 @@ const createSubscription = asyncHandler(async (userId, frequency , price) => {
     await transaction.rollback();
     console.error('Error creating or updating subscription:', error);
     throw new Error('Error creating or updating subscription');
+  }
+};
+
+const getSubscription = asyncHandler(async (req, res) => {
+  // const accessToken = req.params.accessToken; // Extract token from header
+  const userId = req.body.userId;
+// console.log(accessToken);
+  // if (!accessToken) {
+  //   return res.status(401).json({ message: "Access token is missing" });
+  // }
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is missing" });
+  }
+
+  try {
+    // Assuming you have a middleware to verify the access token
+    // and attach user info to the request object
+    // e.g., req.user = { id: verifiedUserId };
+
+    // Fetch the subscription from the database
+    const subscription = await Subscription.findOne({
+      where: { customerId: userId }
+    });
+
+    if (!subscription) {
+      return res.status(404).json({ message: "Subscription not found" });
+    }
+
+    res.status(200).json(subscription);
+  } catch (error) {
+    console.error('Error fetching subscription:', error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -62,4 +95,5 @@ const createSubscription = asyncHandler(async (userId, frequency , price) => {
 
 module.exports = {
   createSubscription,
+  getSubscription
 };
