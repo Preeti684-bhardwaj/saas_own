@@ -97,7 +97,7 @@ const FindBysubscriptions = async (req, res) => {
   // const { userId} = req.query; // Extract frequency from request body
 console.log(req.decodedToken.obj.obj.id);
   try {
-    const subscriptions = await Customer.findOne({
+    const subscriptions = await Customer.findAll({
       where: {
         id: req.decodedToken.obj.obj.id
       },
@@ -109,7 +109,7 @@ console.log(req.decodedToken.obj.obj.id);
         },
       ],
     });
-
+console.log(subscriptions);
     if (subscriptions.length > 0) {
       res.status(200).send(subscriptions);
     } else {
