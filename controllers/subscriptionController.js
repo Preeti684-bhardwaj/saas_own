@@ -1,5 +1,6 @@
 const db = require('../db/dbConnection');
-const Subscription = db.subscriptions
+const Subscription = db.subscriptions;
+const Customer=db.customers;
 const calculateEndDate = require('../utils/endDateConfigure');
 const asyncHandler = require('../utils/asyncHandler');
 
@@ -92,8 +93,40 @@ const getSubscription = asyncHandler(async (req, res) => {
 //         return next(new errorHandler("Error creating subscription", 500));
 //     }
 // });
+const FindBysubscriptions = async (req, res) => {
+  // const { userId} = req.query; // Extract frequency from request body
+console.log(req.decodedToken.obj.obj.id);
+  try {
+    const subscriptions = await Customer.findAll({
+      where: {
+        id: req.decodedToken.obj.obj.id
+      },
+      attributes: { exclude: ['password'] }, 
+      include: [
+        {
+          model: db.subscriptions,
+          as: "subscriptions", // Use the correct association alias
+        },
+      ],
+    });
+
+    if (subscriptions.length > 0) {
+      res.status(200).send(subscriptions);
+    } else {
+      res.status(404).send({
+        message: `Cannot find any Subscription with userId.`
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      message: "Error retrieving Subscription  with userId",
+      error: error.message
+    });
+  }
+};
 
 module.exports = {
   createSubscription,
-  getSubscription
+  getSubscription,
+  FindBysubscriptions
 };

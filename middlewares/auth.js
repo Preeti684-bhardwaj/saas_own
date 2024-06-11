@@ -15,6 +15,7 @@ const authenticate = function (req, res, next) {
         .send({ status: false, message: "Please provide token" });
     let decodedToken = jwt.verify(token, JWT_SECRET);
     req.decodedToken = decodedToken;
+    // console.log(req.decodedToken.obj.obj.id)
     next();
   } catch (error) {
     if (error.message == "Invalid token") {
