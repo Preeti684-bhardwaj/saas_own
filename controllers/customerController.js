@@ -181,10 +181,10 @@ const freeTrial = asyncHandler(async (req, res, next) => {
     const customer = await Customer.findByPk(customerId);
 
     if (!customer) {
-      return res.status(404).send("Customer not found");
+      return res.status(404).send({success:true,message:"Customer not found"});
     }
     if (customer.isSubscribed) {
-      return res.status(404).send("upgrade your plan");
+      return res.status(404).send({success:true,message:"upgrade your plan"});
     }
     const trialDays = 14;
     const trialStartDate = new Date();
