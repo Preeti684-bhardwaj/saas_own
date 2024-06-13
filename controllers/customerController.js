@@ -183,7 +183,9 @@ const freeTrial = asyncHandler(async (req, res, next) => {
     if (!customer) {
       return res.status(404).send("Customer not found");
     }
-
+    if (customer.isSubscribed) {
+      return res.status(404).send("upgrade your plan");
+    }
     const trialDays = 14;
     const trialStartDate = new Date();
     const trialEndDate = new Date(
@@ -196,7 +198,9 @@ const freeTrial = asyncHandler(async (req, res, next) => {
 
     await customer.save();
 
-    res.status(200).send({success:true,message:"Trial started successfully",customer});
+    res
+      .status(200)
+      .send({ success: true, message: "Trial started successfully", customer });
   } catch (error) {
     res.status(500).send("Internal server error");
   }
