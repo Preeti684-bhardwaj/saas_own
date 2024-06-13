@@ -196,7 +196,7 @@ const freeTrial = asyncHandler(async (req, res, next) => {
 
     await customer.save();
 
-    res.send("Trial started successfully");
+    res.status(200).send({success:true,message:"Trial started successfully",customer});
   } catch (error) {
     res.status(500).send("Internal server error");
   }

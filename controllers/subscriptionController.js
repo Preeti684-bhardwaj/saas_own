@@ -3,6 +3,7 @@ const Subscription = db.subscriptions;
 const Customer=db.customers;
 const calculateEndDate = require('../utils/endDateConfigure');
 const asyncHandler = require('../utils/asyncHandler');
+const { where } = require('sequelize');
 
 // stripe webhook data of subscription of customer
 const createSubscription = async (userId, frequency ,plan, price) => {
@@ -20,6 +21,16 @@ const createSubscription = async (userId, frequency ,plan, price) => {
       endDate,
       price:price/100,
     },{transaction});
+    Customer.update(
+      {
+        isSubscribed:true
+      },
+      {
+        where:{
+          id:userId
+        }
+      }
+    ,{transaction})
 
     await transaction.commit();
     console.log('Subscription created or updated successfully:', subscription);
