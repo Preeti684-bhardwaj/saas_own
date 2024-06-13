@@ -6,6 +6,7 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: Sequelize.UUIDV4
         },
         frequency: Sequelize.ENUM('monthly', 'quarterly', 'half-yearly', 'annually'),
+        plan:Sequelize.STRING,
         price: Sequelize.DOUBLE,
         startDate: Sequelize.DATEONLY,
         endDate: Sequelize.DATEONLY,

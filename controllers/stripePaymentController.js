@@ -2,7 +2,6 @@ const Stripe = require('stripe');
 const dotenv = require('dotenv').config();
 const asyncHandler = require('../utils/asyncHandler');
 const errorHandler = require('../utils/errorHandler');
-const { json } = require('sequelize');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 

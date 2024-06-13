@@ -5,7 +5,7 @@ const calculateEndDate = require('../utils/endDateConfigure');
 const asyncHandler = require('../utils/asyncHandler');
 
 // stripe webhook data of subscription of customer
-const createSubscription = async (userId, frequency , price) => {
+const createSubscription = async (userId, frequency ,plan, price) => {
   const transaction = await db.sequelize.transaction();
   try {
     const startDate = new Date();
@@ -14,6 +14,7 @@ const createSubscription = async (userId, frequency , price) => {
     const subscription = await Subscription.create({
       customerId:userId,
       frequency,
+      plan,
       // status: 'active',
       startDate,
       endDate,

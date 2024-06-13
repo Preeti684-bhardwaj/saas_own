@@ -43,11 +43,13 @@ router.post("/hook", express.raw({ type: "application/json" }), async (req, res)
     }
 
     if (eventType === "checkout.session.completed") {
+      console.log("hiii");
       try {
         const customer = await stripe.customers.retrieve(data.customer);
+        console.log(data);
         await createOrder(customer, data);
         await createTransaction(data);
-        await createSubscription(data.metadata.userId, data.metadata.frequency, data.amount_total);
+        await createSubscription(data.metadata.userId, data.metadata.frequency,data.metadata.planName, data.amount_total);
       } catch (err) {
         console.error(err.message);
         return res.status(500).send(`Internal Server Error: ${err.message}`);

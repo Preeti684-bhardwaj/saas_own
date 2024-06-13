@@ -14,6 +14,22 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false
         },
+        trialStartDate: {
+            type: Sequelize.DATE,
+            allowNull: true
+        },
+        trialEndDate: {
+            type: Sequelize.DATE,
+            allowNull: true
+        },
+        isTrialActive: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
+        },
+        isSubscribed: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
+        },
         IsActivated: {
             type: Sequelize.BOOLEAN,
             defaultValue: false

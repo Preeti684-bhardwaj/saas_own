@@ -76,7 +76,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     }
     const customer = await Customer.findOne({ where: { email } });
     if (!customer) {
-        return next(new ErrorHandler("Customer not found.",404 ));
+      return next(new ErrorHandler("Customer not found.", 404));
     }
     //if (!customer.IsActivated) {
     //    return res.status(401).json({ message: "Customer not found" });
@@ -87,7 +87,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
 
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
-        return next(new ErrorHandler("Invalid password.",400));
+      return next(new ErrorHandler("Invalid password.", 400));
     }
 
     const obj = {
@@ -104,10 +104,12 @@ const customerSignin = asyncHandler(async (req, res, next) => {
       // Add additional fields as necessary
     });
   } catch (error) {
-    return next(new ErrorHandler(
-       error.message || "Some error occurred during signin.",
-       500
-    ));
+    return next(
+      new ErrorHandler(
+        error.message || "Some error occurred during signin.",
+        500
+      )
+    );
   }
 });
 
@@ -129,13 +131,11 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
     if (!customerInfo) {
       return next(new ErrorHandler("customer not found", 404));
     }
-    return res
-      .status(200)
-      .send({
-        success: true,
-        message: "valid email",
-        customerID: customerInfo.id,
-      });
+    return res.status(200).send({
+      success: true,
+      message: "valid email",
+      customerID: customerInfo.id,
+    });
   } catch (error) {
     return next(new ErrorHandler("An error occurred", error, 500));
   }
@@ -172,9 +172,40 @@ const resetPassword = asyncHandler(async (req, res, next) => {
   });
 });
 
+// ====================trial period====================================================
+
+const freeTrial = asyncHandler(async (req, res, next) => {
+  try {
+    const customerId = req.decodedToken.obj.obj.id;
+
+    const customer = await Customer.findByPk(customerId);
+
+    if (!customer) {
+      return res.status(404).send("Customer not found");
+    }
+
+    const trialDays = 14;
+    const trialStartDate = new Date();
+    const trialEndDate = new Date(
+      trialStartDate.getTime() + trialDays * 24 * 60 * 60 * 1000
+    );
+
+    customer.trialStartDate = trialStartDate;
+    customer.trialEndDate = trialEndDate;
+    customer.isTrialActive = true;
+
+    await customer.save();
+
+    res.send("Trial started successfully");
+  } catch (error) {
+    res.status(500).send("Internal server error");
+  }
+});
+
 module.exports = {
   customerSignup,
   customerSignin,
   forgotPassword,
   resetPassword,
+  freeTrial,
 };
