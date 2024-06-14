@@ -48,7 +48,7 @@ const stripePayment = asyncHandler(async (req, res, next) => {
       return next(new errorHandler('Plan price must be a positive number', 400));
     }
 
-    // const featuresString = features.join(', ');
+    const featuresString = JSON.stringify(features);
 
     const session = await stripe.checkout.sessions.create({
       billing_address_collection: 'auto',
@@ -60,7 +60,7 @@ const stripePayment = asyncHandler(async (req, res, next) => {
             currency: 'usd',
             product_data: {
               name: planName,
-              description: `${description} - ${features}`,
+              description: `${description} - ${featuresString}`,
             },
             unit_amount: planPrice * 100,
           },
@@ -73,7 +73,7 @@ const stripePayment = asyncHandler(async (req, res, next) => {
       metadata: {
         planName: planName,
         frequency:frequency,
-        features:features,
+        features:featuresString,
         userId: userId,
       },
       // customer:customer.id,
