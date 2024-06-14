@@ -7,6 +7,7 @@ const { where, json } = require('sequelize');
 
 // stripe webhook data of subscription of customer
 const createSubscription = async (userId,features,frequency ,plan, price) => {
+  console.log(features);
   const transaction = await db.sequelize.transaction();
   try {
     const startDate = new Date();
