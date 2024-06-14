@@ -49,7 +49,7 @@ router.post("/hook", express.raw({ type: "application/json" }), async (req, res)
         console.log(data);
         await createOrder(customer, data);
         await createTransaction(data);
-        await createSubscription(data.metadata.userId, data.metadata.frequency,data.metadata.planName, data.amount_total);
+        await createSubscription(data.metadata.userId, data.metadata.features,data.metadata.frequency,data.metadata.planName, data.amount_total);
       } catch (err) {
         console.error(err.message);
         return res.status(500).send(`Internal Server Error: ${err.message}`);

@@ -6,7 +6,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const { where } = require('sequelize');
 
 // stripe webhook data of subscription of customer
-const createSubscription = async (userId, frequency ,plan, price) => {
+const createSubscription = async (userId,features,frequency ,plan, price) => {
   const transaction = await db.sequelize.transaction();
   try {
     const startDate = new Date();
@@ -16,6 +16,7 @@ const createSubscription = async (userId, frequency ,plan, price) => {
       customerId:userId,
       frequency,
       plan,
+      features,
       // status: 'active',
       startDate,
       endDate,
