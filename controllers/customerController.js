@@ -202,7 +202,7 @@ const freeTrial = asyncHandler(async (req, res, next) => {
 
     // Set the freeTrialFeature values
     customer.freeTrialFeature = {
-      numberOfCampaigns: 2, // Example value, set according to your needs
+      "no.of campaign": "2", // Example value, set according to your needs
       // videoLength: 30, // Example value in minutes
       // campaignStorage: 500, // Example value in MB
     };
