@@ -17,7 +17,7 @@ router.post("/signup", validateSignup, customerSignup);
 router.post("/signin", validateSignin, customerSignin);
 router.post("/password/forgot",forgotPassword);
 router.post("/password/reset/:customerId",resetPassword);
-router.post('/startTrial',authenticate,authorize(['CUSTOMER']), freeTrial);
+router.get('/startTrial',authenticate,authorize(['CUSTOMER']),freeTrial);
 // router.get("/verifyemail", validateVerifyEmail, customers.verifyEmail);
 // router.get("/:id", validateFindOneCustomer, customers.findOne);
 // router.put("/:id", validateUpdateCustomer, customers.update);
