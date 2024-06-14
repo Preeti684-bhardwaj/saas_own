@@ -181,10 +181,14 @@ const freeTrial = asyncHandler(async (req, res, next) => {
     const customer = await Customer.findByPk(customerId);
 
     if (!customer) {
-      return res.status(404).send({success:false,message:"Customer not found"});
+      return res
+        .status(404)
+        .send({ success: false, message: "Customer not found" });
     }
     if (customer.isSubscribed) {
-      return res.status(404).send({success:false,message:"upgrade your plan"});
+      return res
+        .status(404)
+        .send({ success: false, message: "upgrade your plan" });
     }
     const trialDays = 14;
     const trialStartDate = new Date();
@@ -195,6 +199,13 @@ const freeTrial = asyncHandler(async (req, res, next) => {
     customer.trialStartDate = trialStartDate;
     customer.trialEndDate = trialEndDate;
     customer.isTrialActive = true;
+
+    // Set the freeTrialFeature values
+    customer.freeTrialFeature = {
+      numberOfCampaigns: 2, // Example value, set according to your needs
+      // videoLength: 30, // Example value in minutes
+      // campaignStorage: 500, // Example value in MB
+    };
 
     await customer.save();
 

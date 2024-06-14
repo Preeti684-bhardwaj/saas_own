@@ -9,7 +9,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         name: Sequelize.STRING,
         description: Sequelize.STRING,
-        features:Sequelize.ARRAY(STRING),  //tumhe json banna hai
+        features:Sequelize.JSON,  //tumhe json banna hai
         media: Sequelize.JSON,
         createdAt: Sequelize.DATE,
         updatedAt: Sequelize.DATE

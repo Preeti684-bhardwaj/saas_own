@@ -1,3 +1,5 @@
+const { freeTrial } = require("../controllers/customerController");
+
 module.exports = (sequelize, Sequelize) => {
     const Customer = sequelize.define('customer', {
         id: {
@@ -25,6 +27,14 @@ module.exports = (sequelize, Sequelize) => {
         isTrialActive: {
             type: Sequelize.BOOLEAN,
             defaultValue: false
+        },
+        freeTrialFeature: {
+            type: Sequelize.JSON,
+            // defaultValue: {
+            //     numberOfCampaigns: 2,
+            //     // videoLength: 30,
+            //     // campaignStorage: 26,214,400 
+            // }
         },
         isSubscribed: {
             type: Sequelize.BOOLEAN,

@@ -23,7 +23,10 @@ const createSubscription = async (userId, frequency ,plan, price) => {
     },{transaction});
     Customer.update(
       {
-        isSubscribed:true
+        isSubscribed:true,
+        trialStartDate:null,
+        trialEndDate:null,
+        isTrialActive:false
       },
       {
         where:{
