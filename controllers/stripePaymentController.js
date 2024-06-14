@@ -40,9 +40,9 @@ const stripePayment = asyncHandler(async (req, res, next) => {
       return next(new errorHandler('Missing required fields', 400));
     }
 
-    if (!Array.isArray(features) || features.length === 0) {
-      return next(new errorHandler('Features must be a non-empty array', 400));
-    }
+    // if (!Array.isArray(features) || features.length === 0) {
+    //   return next(new errorHandler('Features must be a non-empty array', 400));
+    // }
 
     if (typeof planPrice !== 'number' || planPrice <= 0) {
       return next(new errorHandler('Plan price must be a positive number', 400));
