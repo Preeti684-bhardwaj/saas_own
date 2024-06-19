@@ -2,8 +2,7 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv").config();
 const { JWT_SECRET } = process.env;
 
-//athentication
-
+//authentication
 const authenticate = function (req, res, next) {
   try {
     let token = req.headers.authorization;
@@ -28,7 +27,6 @@ const authenticate = function (req, res, next) {
 };
 
 //authorisation
-
 const authorize = (roles = []) => {
   return [
     (req, res, next) => {

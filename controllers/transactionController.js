@@ -1,7 +1,8 @@
 const db = require("../db/dbConnection");
 const Transaction = db.transactions;
 const Order=db.orders;
-const asyncHandler = require('../utils/asyncHandler');
+
+// create transaction
 const createTransaction = async (data) => {
     try {
         // Find the order using the payment_intent

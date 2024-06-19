@@ -149,8 +149,6 @@ const deletePlanById = async (req, res) => {
 };
 
 
-
-
 module.exports={
     createSubscriptionPlan,
     FindByFrequency,

@@ -36,6 +36,7 @@ const createProduct = asyncHandler(async (req, res, next) => {
   }
 });
 
+// find product with subscription plan
 const findAllWithSubscriptionPlans = async (req, res) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 0; // Default to page 0 if not provided
   const size = req.query.size ? parseInt(req.query.size, 10) : 10; // Default size is 10

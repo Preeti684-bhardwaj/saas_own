@@ -5,6 +5,7 @@ const errorHandler = require('../utils/errorHandler');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
+// stripe checkout session 
 const stripePayment = asyncHandler(async (req, res, next) => {
     // const customer = await stripe.customers.create({
     //     metadata:{
@@ -100,6 +101,7 @@ const stripePayment = asyncHandler(async (req, res, next) => {
   }
 });
 
+// get session detail
 const getSessionDetails = asyncHandler(async (req, res, next) => {
   try {
     const session_id = req.query.session_id;

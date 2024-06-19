@@ -47,6 +47,7 @@ const createSubscription = async (userId,features,frequency ,plan, price) => {
   }
 };
 
+// get subscription of a customer 
 const getSubscription = asyncHandler(async (req, res) => {
   // const accessToken = req.params.accessToken; // Extract token from header
   const userId = req.body.userId;
@@ -110,6 +111,9 @@ const getSubscription = asyncHandler(async (req, res) => {
 //         return next(new errorHandler("Error creating subscription", 500));
 //     }
 // });
+
+
+// find by subscription
 const FindBysubscriptions = async (req, res) => {
   // const { userId} = req.query; // Extract frequency from request body
 console.log(req.decodedToken.obj.obj.id);
