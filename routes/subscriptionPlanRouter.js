@@ -7,6 +7,6 @@ const {validateSubscriptionPlanCreation} = require('../utils/validation');
 router.post('/createSubsPlan',authenticate,authorize(['ADMIN']),validateSubscriptionPlanCreation,createSubscriptionPlan);
 router.get('/getAllSubsplan',authenticate,authorize(['ADMIN','CUSTOMER']),subsFindAll)
 router.get('/getByIdSubsplan/:id',authenticate,authorize(['ADMIN','CUSTOMER']),subsFindOne)
-router.get('/getByFrequency',FindByFrequency)
+router.get('/getByFrequency',authenticate,authorize(['ADMIN','CUSTOMER']),FindByFrequency)
 router.delete('/deletePlanById/:id',authenticate,authorize(['ADMIN']),deletePlanById)
 module.exports = router;

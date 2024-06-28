@@ -13,12 +13,9 @@ const dotenv = require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 let endpointSecret;
 
-// = process.env.STRIPE_WEBHOOK_SECRET;
-
 // Checkout session
 router.post("/create-checkout-session", stripePayment);
 router.get("/get-session", getSessionDetails);
-// router.get('/success', orderDetails);
 
 // Setup webhook
 router.post("/hook", express.raw({ type: "application/json" }), async (req, res) => {

@@ -3,12 +3,10 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
-const path = require("path");
-
 const app = express();
 
 app.use(cors());
-app.use(express.static(path.join(__dirname)));
+app.use(express.static("public"));
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));

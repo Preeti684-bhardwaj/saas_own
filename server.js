@@ -1,7 +1,6 @@
 const app = require("./app.js")
 const db = require("./db/dbConnection.js")
 require("dotenv").config({path:"./.env"})
-
 const passport = require('passport');
 const passportJWT = require('passport-jwt');
 

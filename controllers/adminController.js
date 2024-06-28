@@ -4,7 +4,6 @@ const asyncHandler = require("../utils/asyncHandler.js");
 const ErrorHandler = require("../utils/errorHandler.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-// const mail = require('../mail/mailgun.js');
 const { validationResult } = require("express-validator");
 
 // Helper function to generate JWT

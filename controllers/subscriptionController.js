@@ -3,7 +3,6 @@ const Subscription = db.subscriptions;
 const Customer=db.customers;
 const calculateEndDate = require('../utils/endDateConfigure');
 const asyncHandler = require('../utils/asyncHandler');
-const { where, json } = require('sequelize');
 
 // stripe webhook data of subscription of customer
 const createSubscription = async (userId,features,frequency ,plan, price) => {

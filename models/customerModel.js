@@ -1,4 +1,4 @@
-const { freeTrial } = require("../controllers/customerController");
+// const { freeTrial } = require("../controllers/customerController");
 
 module.exports = (sequelize, Sequelize) => {
     const Customer = sequelize.define('customer', {

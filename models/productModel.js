@@ -1,5 +1,3 @@
-const { STRING } = require("sequelize");
-
 module.exports = (sequelize, Sequelize) => {
     const Product = sequelize.define('product', {
         id: {
