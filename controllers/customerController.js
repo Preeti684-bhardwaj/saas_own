@@ -193,7 +193,11 @@ const freeTrial = asyncHandler(async (req, res, next) => {
   try {
     const customerId = req.decodedToken.obj.obj.id;
 
-    const customer = await Customer.findByPk(customerId);
+    const customer = await Customer.findByPk(customerId, {
+      attributes: {
+        exclude: ["password"],
+      },
+    });
 
     if (!customer) {
       return res
@@ -217,7 +221,7 @@ const freeTrial = asyncHandler(async (req, res, next) => {
 
     // Set the freeTrialFeature values
     customer.freeTrialFeature = {
-      "no.of campaign": "2", // Example value, set according to your needs
+      "totalResponse": 2, // Example value, set according to your needs
       // videoLength: 30, // Example value in minutes
       // campaignStorage: 500, // Example value in MB
     };
