@@ -13,6 +13,7 @@ const generateToken = (admin) => {
   });
 };
 
+
 // -------------------ADMIN SIGNUP------------------------------------------------------
 const adminSignup = asyncHandler(async (req, res, next) => {
   try {

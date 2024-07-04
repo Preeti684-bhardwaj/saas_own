@@ -4,6 +4,7 @@ const asyncHandler = require("../utils/asyncHandler.js");
 const ErrorHandler = require("../utils/errorHandler.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 // const mail = require('../mail/mailgun.js');
 const { validationResult } = require("express-validator");
 
@@ -13,6 +14,12 @@ const generateToken = (user) => {
     expiresIn: "72h", // expires in 24 hours
   });
 };
+
+// Helper function to generate API key
+const generateApiKey = () => {
+  return crypto.randomBytes(32).toString("hex");
+};
+
 // -----------------CUSTOMER SIGNUP-----------------------------------------------------
 const customerSignup = asyncHandler(async (req, res, next) => {
   try {
@@ -94,13 +101,21 @@ const customerSignin = asyncHandler(async (req, res, next) => {
       type: "CUSTOMER",
       obj: customer,
     };
-
+    let apiKey = customer.api_key;
+    if (!apiKey) {
+      // Generate API key
+      apiKey = generateApiKey();
+      // Update the customer record with the new API key
+      await customer.update({ api_key: apiKey });
+    }
+    //  generate token
     const token = generateToken(obj);
 
     res.status(200).send({
       id: customer.id,
       email: customer.email,
       token: token,
+      api_key: apiKey,
       // Add additional fields as necessary
     });
   } catch (error) {

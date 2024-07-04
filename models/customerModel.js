@@ -53,6 +53,7 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: false
         },
         emailToken: Sequelize.STRING,
+        api_key:Sequelize.STRING,
         createdAt: Sequelize.DATE,
         updatedAt: Sequelize.DATE
     });

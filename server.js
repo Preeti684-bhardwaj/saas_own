@@ -1,3 +1,4 @@
+const { FORCE } = require("sequelize/lib/index-hints");
 const app = require("./app.js")
 const db = require("./db/dbConnection.js")
 require("dotenv").config({path:"./.env"})
@@ -44,7 +45,7 @@ passport.use('jwt', strategy);
   
 // connectDB()
 // database connection
-db.sequelize.sync()
+db.sequelize.sync({force:true})
 .then(() => {
     const server = app.listen(process.env.PORT || 8000, () => {
         console.log(`⚙️ Server is running at port : ${process.env.PORT}`);

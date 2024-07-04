@@ -115,7 +115,7 @@ const getSubscription = asyncHandler(async (req, res) => {
 // find by subscription
 const FindBysubscriptions = async (req, res) => {
   // const { userId} = req.query; // Extract frequency from request body
-console.log(req.decodedToken.obj.obj.id);
+// console.log(req.decodedToken.obj.obj.id);
   try {
     const subscriptions = await Customer.findAll({
       where: {
@@ -145,8 +145,42 @@ console.log(subscriptions);
   }
 };
 
+// find by subscription
+const FindBysubscriptionsBYApiKey= async (req, res) => {
+  // const { userId} = req.query; // Extract frequency from request body
+// console.log(req.decodedToken.obj.obj.id);
+  try {
+    const subscriptions = await Customer.findAll({
+      where: {
+        api_key: req.userApiKey
+      },
+      attributes: { exclude: ['password'] }, 
+      include: [
+        {
+          model: db.subscriptions,
+          as: "subscriptions", // Use the correct association alias
+        },
+      ],
+    });
+console.log(subscriptions);
+    if (subscriptions.length > 0) {
+      res.status(200).send(subscriptions);
+    } else {
+      res.status(404).send({
+        message: `Cannot find any Subscription with userId.`
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      message: "Error retrieving Subscription  with userId",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   createSubscription,
   getSubscription,
-  FindBysubscriptions
+  FindBysubscriptions,
+  FindBysubscriptionsBYApiKey
 };
