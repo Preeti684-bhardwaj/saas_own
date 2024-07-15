@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { customerSignup,customerSignin,forgotPassword,resetPassword , freeTrial } = require("../controllers/customerController");
+const { customerSignup,customerSignin,forgotPassword,resetPassword , freeTrial, sendOtp, emailOtpVerification } = require("../controllers/customerController");
 const {
 //   validateCreateCustomer,
   validateSignup,
@@ -15,8 +15,10 @@ const {authenticate,authorize}=require('../middlewares/auth');
 
 router.post("/signup", validateSignup, customerSignup);
 router.post("/signin", validateSignin, customerSignin);
-router.post("/password/forgot",forgotPassword);
-router.post("/password/reset/:customerId",resetPassword);
+router.post("/sendOtp",sendOtp)
+router.post("/emailVerification",emailOtpVerification)
+router.post("/forgotpassword",forgotPassword);
+router.post("/resetpassword/:customerId",resetPassword);
 router.get('/startTrial',authenticate,authorize(['CUSTOMER']),freeTrial);
 // router.get("/verifyemail", validateVerifyEmail, customers.verifyEmail);
 // router.get("/:id", validateFindOneCustomer, customers.findOne);

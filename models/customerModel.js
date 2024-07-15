@@ -7,6 +7,7 @@ module.exports = (sequelize, Sequelize) => {
             primaryKey: true,
             defaultValue: Sequelize.UUIDV4
         },
+        name:Sequelize.STRING,
         email: {
             type: Sequelize.STRING,
             allowNull: false
@@ -40,11 +41,13 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.BOOLEAN,
             defaultValue: false
         },
+        otp:Sequelize.STRING,
+        otpExpire:Sequelize.DATE,
         IsActivated: {
             type: Sequelize.BOOLEAN,
             defaultValue: false
         },
-        IsEmailVerified: {
+        isEmailVerified: {
             type: Sequelize.BOOLEAN,
             defaultValue: false
         },

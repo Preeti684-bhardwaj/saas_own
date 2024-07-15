@@ -3,8 +3,16 @@ const Customer = db.customers;
 const asyncHandler = require("../utils/asyncHandler.js");
 const ErrorHandler = require("../utils/errorHandler.js");
 const bcrypt = require("bcrypt");
+const {Op}=require("sequelize");
+const sendEmail = require("../utils/sendEmail.js");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const {
+  isValidEmail,
+  isValidPhone,
+  isValidPassword,
+  isValidLength,
+} = require("../utils/validation.js");
 // const mail = require('../mail/mailgun.js');
 const { validationResult } = require("express-validator");
 
@@ -14,6 +22,23 @@ const generateToken = (user) => {
     expiresIn: "72h", // expires in 24 hours
   });
 };
+const generateOtp = () => {
+  // Define the possible characters for the OTP
+  const chars = "0123456789";
+  // Define the length of the OTP
+  const len = 6;
+  let otp = "";
+  // Generate the OTP
+  for (let i = 0; i < len; i++) {
+    otp += chars[Math.floor(Math.random() * chars.length)];
+  }
+
+  this.otp = otp;
+  this.otpExpire = Date.now() + 15 * 60 * 1000;
+
+  return otp;
+};
+
 
 // Helper function to generate API key
 const generateApiKey = () => {
@@ -23,7 +48,7 @@ const generateApiKey = () => {
 // -----------------CUSTOMER SIGNUP-----------------------------------------------------
 const customerSignup = asyncHandler(async (req, res, next) => {
   try {
-    const { email, password, phone } = req.body;
+    const {name, email, password, phone } = req.body;
     if (!email) {
       return next(new ErrorHandler("email is missing", 400));
     }
@@ -35,40 +60,222 @@ const customerSignup = asyncHandler(async (req, res, next) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const existingUser = await Customer.findOne({ where: { email } });
-
-    if (existingUser) {
-      return next(new ErrorHandler("Email is already in use.", 400));
+    if (!isValidEmail(email)) {
+      return res.status(400).send({ message: "Invalid email" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const emailToken = generateToken({ email }); // This should ideally be a different token, specific for email verification
+    if (!isValidPhone(phone)) {
+      return res.status(400).send({ message: "Invalid Phone Number" });
+    }
 
-    const customer = await Customer.create({
-      email,
-      password: hashedPassword,
-      phone,
-      emailToken,
-      // Additional fields as necessary
+    if (!isValidPassword(password)) {
+      return res.status(400).send({
+        message:
+          "Password must contain at least 8 characters, including uppercase, lowercase, number and special character",
+      });
+    }
+
+    if (!isValidLength(name)) {
+      return res.status(400).send({
+        message:
+          "Name should be greater than 3 characters and less than 40 characters and should not start with number",
+      });
+    }
+  // Convert the email to lowercase for case-insensitive comparison
+  const lowercaseEmail = email.toLowerCase();
+
+  // Use a case-insensitive query to check for existing email
+  const existingUser = await Customer.findOne({
+    where: {
+      [Op.or]: [{ email: email.toLowerCase() }, { phone }]
+  }
+  });
+
+  if (existingUser) {
+    if (existingUser.email.toLowerCase() === email.toLowerCase() && existingUser.phone === phone) {
+      return res.status(400).send({ message: "Both email and phone number are already in use" });
+  } else if (existingUser.email.toLowerCase() === email.toLowerCase()) {
+      return res.status(400).send({ message: "Email already in use" });
+  } else {
+      return res.status(400).send({ message: "Phone number already in use" });
+  }
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const emailToken = generateToken({ email: lowercaseEmail }); // Using lowercase email for token
+
+  const customer = await Customer.create({
+    name,
+    email: lowercaseEmail, // Store email in lowercase
+    password: hashedPassword,
+    phone,
+    emailToken,
+    // Additional fields as necessary
+  });
+
+  //sendVerificationEmail(lowercaseEmail, emailToken);
+
+  res.status(201).send({
+    id: customer.id,
+    name:customer.name,
+    email: customer.email,
+    // Add additional fields as necessary
+  });
+} catch (error) {
+  return next(
+    new ErrorHandler(
+      error.message || "Some error occurred during signup.",
+      500
+    )
+  );
+}
+});
+    // ===========
+//     const existingUser = await Customer.findOne({ where: { email } });
+
+//     if (existingUser) {
+//       return next(new ErrorHandler("Email is already in use.", 400));
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     const emailToken = generateToken({ email }); // This should ideally be a different token, specific for email verification
+
+//     const customer = await Customer.create({
+//       email,
+//       password: hashedPassword,
+//       phone,
+//       emailToken,
+//       // Additional fields as necessary
+//     });
+
+//     //sendVerificationEmail(email, emailToken);
+
+//     res.status(201).send({
+//       id: customer.id,
+//       email: customer.email,
+//       // Add additional fields as necessary
+//     });
+//   } catch (error) {
+//     return next(
+//       new ErrorHandler(
+//         error.message || "Some error occurred during signup.",
+//         500
+//       )
+//     );
+//   }
+// });
+// ----------------send otp-----------------------------
+const sendOtp =asyncHandler(async (req, res, next) => {
+  const { phone } = req.body;
+
+  if (!phone) {
+    return res.status(400).send({ message: "Missing phone" });
+  }
+
+  if (!isValidPhone(phone)) {
+    return res.status(400).send({ message: "Invalid phone" });
+  }
+
+  try {
+    const customer = await Customer.findOne({
+      where: {
+        phone: phone.trim(),
+      },
     });
 
-    //sendVerificationEmail(email, emailToken);
+    if (!customer) {
+      return res.status(404).send({ message: "Customer not found" });
+    }
 
-    res.status(201).send({
-      id: customer.id,
-      email: customer.email,
-      // Add additional fields as necessary
-    });
+    const otp = generateOtp();
+    customer.otp = otp;
+    customer.otpExpire = Date.now() + 15 * 60 * 1000;
+
+    await customer.save({ validate: false });
+
+    const message = `Your One Time Password (OTP) is ${otp}`;
+    try {
+      await sendEmail({
+        email: customer.email,
+        subject: `One-Time Password (OTP) for Verification`,
+        message,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: `OTP sent to ${customer.email} successfully`,
+        email: customer.email,
+        customerId: customer.id,
+      });
+    } catch (emailError) {
+      customer.otp = null;
+      customer.otpExpire = null;
+      await customer.save({ validate: false });
+
+      console.error("Failed to send OTP email:", emailError);
+      return res.status(500).send(emailError.message);
+    }
   } catch (error) {
-    return next(
-      new ErrorHandler(
-        error.message || "Some error occurred during signup.",
-        500
-      )
-    );
+    console.log(error)
+    return res.status(500).send(error.message);
   }
 });
+// ==========================email verification------------------------------
+const emailOtpVerification = asyncHandler(async (req, res) => {
+    const { phone, otp } = req.body;
 
+    // Validate the OTP
+    if (!otp) {
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP is required." });
+    }
+
+    try {
+      const customer = await Customer.findOne({ where: { phone } });
+      console.log(customer);
+      if (!customer) {
+        return res.status(400).json({
+          success: false,
+          message: "Customer not found or invalid details.",
+        });
+      }
+
+      // Check OTP validity
+      if (customer.otp !== otp) {
+        return res.status(400).json({ success: false, message: "Invalid OTP" });
+      }
+      if (customer.otpExpire < Date.now()) {
+        return res
+          .status(400)
+          .json({ success: false, message: "expired OTP." });
+      }
+
+      // Update agent details
+      customer.isEmailVerified = true;
+      customer.otp = null;
+      customer.otpExpire = null;
+      await customer.save();
+
+      res.status(201).json({
+        success: true,
+        message: "Customer data",
+        agent: {
+          id: customer.id,
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone,
+          isEmailVerified: customer.isEmailVerified,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Server Error",
+        error: error.message,
+      });
+    }
+  });
 // -----------------CUSTOMER SIGNIN-----------------------------------------------------
 const customerSignin = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -88,9 +295,9 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     //if (!customer.IsActivated) {
     //    return res.status(401).json({ message: "Customer not found" });
     //}
-    //if (!customer.IsEmailVerified) {
-    //    return res.status(401).json({ message: "Email not verified" });
-    //}
+    if (!customer.isEmailVerified) {
+       return res.status(401).json({ message: "Email not verified" });
+    }
 
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
@@ -129,63 +336,118 @@ const customerSignin = asyncHandler(async (req, res, next) => {
 });
 
 // ---------------FORGET PASSWORD-----------------------------------------------------
-const forgotPassword = asyncHandler(async (req, res, next) => {
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  // Validate input fields
+  if (!email) {
+    return res.status(400).send({ message: "Missing email id" });
+  }
+
+  if (!isValidEmail(email)) {
+    return res.status(400).send({ message: "Invalid email address" });
+  }
+
+  let customer;
+
   try {
-    const { email } = req.body;
-
-    if (!email) {
-      return next(new ErrorHandler("email is missing", 400));
-    }
-
-    const customerInfo = await Customer.findOne({
+    // Find the agent by email
+    customer = await Customer.findOne({
       where: {
         email: email.trim(),
       },
     });
 
-    if (!customerInfo) {
-      return next(new ErrorHandler("customer not found", 404));
+    if (!customer) {
+      return res.status(404).send({ message: "Customer not found" });
     }
-    return res.status(200).send({
+    if (!customer.isEmailVerified) {
+      return res.status(400).send({ message: "Customer is not verified" });
+    }
+
+    // Get ResetPassword Token
+    const otp = generateOtp(); // Assuming you have a method to generate the OTP
+    customer.otp = otp;
+    customer.otpExpire = Date.now() + 15 * 60 * 1000; // Set OTP expiration time (e.g., 15 minutes)
+
+    await customer.save({ validate: false });
+
+    const message = `Your One Time Password is ${otp}`;
+
+    await sendEmail({
+      email: customer.email,
+      subject: `Password Recovery`,
+      message,
+    });
+
+    res.status(200).json({
       success: true,
-      message: "valid email",
-      customerID: customerInfo.id,
+      message: `OTP sent to ${customer.email} successfully`,
+      customerId: customer.id,
     });
   } catch (error) {
-    return next(new ErrorHandler("An error occurred", error, 500));
+    if (customer) {
+      customer.otp = null;
+      customer.otpExpire = null;
+      await customer.save({ validate: false });
+    }
+
+    return res.status(500).send(error.message);
   }
 });
 
 // ---------------RESET PASSWORD------------------------------------------------------------
-const resetPassword = asyncHandler(async (req, res, next) => {
-  const { password } = req.body;
+const resetPassword = asyncHandler(async (req, res) => {
+  const { password, otp } = req.body;
   const customerId = req.params.customerId;
 
-  const findCustomer = await Customer.findByPk(customerId);
-
-  if (!findCustomer) {
-    return next(new ErrorHandler("customer not found", 404));
-  }
-
-  if (!password) {
-    return next(new ErrorHandler("Password is missing", 400));
+  // Validate input fields
+  if (!password || !otp) {
+    return res
+      .status(400)
+      .send({ message: "Missing required fields: password or OTP" });
   }
   const hashedPassword = await bcrypt.hash(password, 10);
-  findCustomer.password = hashedPassword;
 
-  await findCustomer.save({ validate: false });
+  try {
+    // Find the agent by ID
+    const customer = await Customer.findByPk(customerId);
 
-  const loggedInCustomer = await Customer.findByPk(findCustomer.id, {
-    attributes: {
-      exclude: ["password"],
-    },
-  });
+    if (!customer) {
+      return res.status(400).send({ message: "Customer not found" });
+    }
 
-  return res.status(200).json({
-    success: true,
-    data: loggedInCustomer,
-  });
+    // Verify the OTP
+    if (customer.otp !== otp.trim()) {
+      return res.status(400).send({ message: "Invalid OTP" });
+    }
+    if (customer.otpExpire < Date.now()) {
+      return res.status(400).send({ message: "expired OTP" });
+    }
+
+    // Update the agent's password and clear OTP fields
+    customer.password = hashedPassword;
+    customer.otp = null;
+    customer.otpExpire = null;
+
+    await customer.save({ validate: true });
+
+    // Exclude password from the response
+    const updatedCustomer = await Customer.findByPk(customer.id, {
+      attributes: {
+        exclude: ["password"],
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Password updated for ${updatedCustomer.email}`,
+    });
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
 });
+
 
 // ====================trial period====================================================
 
@@ -238,6 +500,8 @@ const freeTrial = asyncHandler(async (req, res, next) => {
 
 module.exports = {
   customerSignup,
+  sendOtp,
+  emailOtpVerification,
   customerSignin,
   forgotPassword,
   resetPassword,
