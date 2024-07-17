@@ -166,20 +166,20 @@ const customerSignup = asyncHandler(async (req, res, next) => {
 // });
 // ----------------send otp-----------------------------
 const sendOtp =asyncHandler(async (req, res, next) => {
-  const { phone } = req.body;
+  const { email } = req.body;
 
-  if (!phone) {
-    return res.status(400).send({ message: "Missing phone" });
+  if (!email) {
+    return res.status(400).send({ message: "Missing email" });
   }
 
-  if (!isValidPhone(phone)) {
-    return res.status(400).send({ message: "Invalid phone" });
+  if (!isValidEmail(email)) {
+    return res.status(400).send({ message: "Invalid Email" });
   }
 
   try {
     const customer = await Customer.findOne({
       where: {
-        phone: phone.trim(),
+        email: email.trim(),
       },
     });
 
@@ -222,9 +222,12 @@ const sendOtp =asyncHandler(async (req, res, next) => {
 });
 // ==========================email verification------------------------------
 const emailOtpVerification = asyncHandler(async (req, res) => {
-    const { phone, otp } = req.body;
+    const { email, otp } = req.body;
 
     // Validate the OTP
+    if (!email) {
+      return next(new ErrorHandler("email is missing", 400));
+    }
     if (!otp) {
       return res
         .status(400)
@@ -232,7 +235,7 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
     }
 
     try {
-      const customer = await Customer.findOne({ where: { phone } });
+      const customer = await Customer.findOne({ where: { email:email } });
       console.log(customer);
       if (!customer) {
         return res.status(400).json({
