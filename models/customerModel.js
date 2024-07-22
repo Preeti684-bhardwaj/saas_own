@@ -41,6 +41,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.BOOLEAN,
             defaultValue: false
         },
+        resetToken:Sequelize.STRING,
+        resetTokenExpire:Sequelize.DATE,
         otp:Sequelize.STRING,
         otpExpire:Sequelize.DATE,
         IsActivated: {

@@ -342,7 +342,6 @@ const customerSignin = asyncHandler(async (req, res, next) => {
 const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
-  // Validate input fields
   if (!email) {
     return res.status(400).send({ message: "Missing email id" });
   }
@@ -354,7 +353,6 @@ const forgotPassword = asyncHandler(async (req, res) => {
   let customer;
 
   try {
-    // Find the agent by email
     customer = await Customer.findOne({
       where: {
         email: email.trim(),
@@ -368,30 +366,31 @@ const forgotPassword = asyncHandler(async (req, res) => {
       return res.status(400).send({ message: "Customer is not verified" });
     }
 
-    // Get ResetPassword Token
-    const otp = generateOtp(); // Assuming you have a method to generate the OTP
-    customer.otp = otp;
-    customer.otpExpire = Date.now() + 15 * 60 * 1000; // Set OTP expiration time (e.g., 15 minutes)
+    // Generate reset token and expiration time
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    customer.resetToken = resetToken;
+    customer.resetTokenExpire = Date.now() + 15 * 60 * 1000; // Set expiration time (15 minutes)
 
     await customer.save({ validate: false });
 
-    const message = `Your One Time Password is ${otp}`;
+    const resetUrl = `https://aiengage-samadsrahmans-projects.vercel.app/resetPassword/${resetToken}`;
+
+    const message = `You requested a password reset. Please click the link below to reset your password:\n\n${resetUrl}`;
 
     await sendEmail({
       email: customer.email,
-      subject: `Password Recovery`,
+      subject: `Password Reset`,
       message,
     });
 
     res.status(200).json({
       success: true,
-      message: `OTP sent to ${customer.email} successfully`,
-      customerId: customer.id,
+      message: `Password reset link sent to ${customer.email}`,
     });
   } catch (error) {
     if (customer) {
-      customer.otp = null;
-      customer.otpExpire = null;
+      customer.resetToken = null;
+      customer.resetTokenExpire = null;
       await customer.save({ validate: false });
     }
 
@@ -401,37 +400,32 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
 // ---------------RESET PASSWORD------------------------------------------------------------
 const resetPassword = asyncHandler(async (req, res) => {
-  const { password, otp } = req.body;
-  const customerId = req.params.customerId;
+  const { password } = req.body;
+  const { token } = req.params; // The token from the URL
 
-  // Validate input fields
-  if (!password || !otp) {
-    return res
-      .status(400)
-      .send({ message: "Missing required fields: password or OTP" });
+  if (!password || !token) {
+    return res.status(400).send({ message: "Missing required fields: password or token" });
   }
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
-    // Find the agent by ID
-    const customer = await Customer.findByPk(customerId);
+    // Find the customer by reset token
+    const customer = await Customer.findOne({
+      where: {
+        resetToken: token,
+        resetTokenExpire: { [Op.gt]: Date.now() }, // Check if token is not expired
+      },
+    });
 
     if (!customer) {
-      return res.status(400).send({ message: "Customer not found" });
+      return res.status(400).send({ message: "Invalid or expired token" });
     }
 
-    // Verify the OTP
-    if (customer.otp !== otp.trim()) {
-      return res.status(400).send({ message: "Invalid OTP" });
-    }
-    if (customer.otpExpire < Date.now()) {
-      return res.status(400).send({ message: "expired OTP" });
-    }
-
-    // Update the agent's password and clear OTP fields
+    // Update the customer's password and clear token fields
     customer.password = hashedPassword;
-    customer.otp = null;
-    customer.otpExpire = null;
+    customer.resetToken = null;
+    customer.resetTokenExpire = null;
 
     await customer.save({ validate: true });
 
