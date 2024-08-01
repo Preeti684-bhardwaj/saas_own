@@ -7,10 +7,10 @@ const { JWT_SECRET } = process.env;
 //authentication
 const authenticate = function (req, res, next) {
   try {
+    console.log(req.cookies);
     const token = req.cookies.access_token;
     // token = token.replace("Bearer", "").trim();
 console.log(token);
-console.log(req.cookies);
     if (!token)
       return res
         .status(401)
