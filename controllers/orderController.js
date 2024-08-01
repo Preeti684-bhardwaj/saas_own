@@ -10,33 +10,58 @@ const dotenv = require('dotenv').config();
 // const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // createOrder
-const createOrder = async (customer, data) => {
-  const transaction = await db.sequelize.transaction();
-  try {
-    const order = await Order.create({
-      customerId: customer.metadata.userId,
-      StripeCustomerId: data.customer,
-      date: new Date(),
-      invoiceNumber: data.invoice,
-      subscription: data.metadata,
-      payment: {
-        intentId: data.payment_intent,
-        status: data.payment_status,
-        amount: data.amount_total / 100,
-        currency: data.currency,
-        method: data.payment_method_types[0],
-      },
-      status: data.status,
-    },{ transaction });
-    console.log("Order created successfully:", order);
-    await transaction.commit();
-    return order;
-  } catch (error) {
-    await transaction.rollback();
-    console.error("Error creating order:", error);
-    throw new Error("Error creating order");
-  }
-};
+const createOrder = asyncHandler(async(req,res,next) => {
+    const transaction = await db.sequelize.transaction();
+    try {
+      const {userId,subscription}=req.body
+      if(!userId){
+        return next(new ErrorHandler("userId is missing", 400));
+      }
+      if(!subscription){
+        return next(new ErrorHandler("subscription Detail is missing", 400));
+      }
+      const order = await Order.create({
+        customerId: userId,
+        date: new Date(),
+        subscription: subscription,
+        status: "pending",
+      },{ transaction });
+      console.log("Order created successfully:", order);
+      await transaction.commit();
+      return res.status(200).send({status:true,data:order});
+    } catch (error) {
+      await transaction.rollback();
+      console.error("Error creating order:", error);
+      throw new Error("Error creating order");
+    }
+  });
+// const createOrder = async (customer, data) => {
+//   const transaction = await db.sequelize.transaction();
+//   try {
+//     const order = await Order.create({
+//       customerId: customer.metadata.userId,
+//       StripeCustomerId: data.customer,
+//       date: new Date(),
+//       invoiceNumber: data.invoice,
+//       subscription: data.metadata,
+//       payment: {
+//         intentId: data.payment_intent,
+//         status: data.payment_status,
+//         amount: data.amount_total / 100,
+//         currency: data.currency,
+//         method: data.payment_method_types[0],
+//       },
+//       status: data.status,
+//     },{ transaction });
+//     console.log("Order created successfully:", order);
+//     await transaction.commit();
+//     return order;
+//   } catch (error) {
+//     await transaction.rollback();
+//     console.error("Error creating order:", error);
+//     throw new Error("Error creating order");
+//   }
+// };
 
 // const orderDetails = async (req, res) => {
 //   let { session_id } = req.query;

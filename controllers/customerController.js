@@ -445,6 +445,24 @@ const resetPassword = asyncHandler(async (req, res) => {
   }
 });
 
+// ===================get user by id------------------------------------
+
+const getUserById = asyncHandler(async (req, res, next) => {
+  try {
+    const id = req.params.userId;
+    const item = await Customer.findByPk(id, {
+      attributes: { exclude: ["password"] },
+    });
+    if (!item) {
+      res.status(404).json({ success: false, error: "User not found" });
+    } else {
+      res.json({ success: true, data: item });
+    }
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+});
+
 
 // ====================trial period====================================================
 
@@ -499,6 +517,7 @@ module.exports = {
   customerSignup,
   sendOtp,
   emailOtpVerification,
+  getUserById,
   customerSignin,
   forgotPassword,
   resetPassword,

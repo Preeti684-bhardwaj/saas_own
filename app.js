@@ -17,8 +17,8 @@ const adminRouter = require("./routes/adminRouter.js");
 const productRouter = require("./routes/productRouter.js");
 const subscriptionRouter = require("./routes/subscriptionRouter.js");
 const subscriptionPlanRouter = require("./routes/subscriptionPlanRouter.js");
-// const orderRouter = require("./routes/orderRouter.js");
-const stripePaymentRouter = require('./routes/stripesPaymentRouter.js');
+const orderRouter = require("./routes/orderRouter.js");
+const cashfreePaymentRouter = require('./routes/cashfreePaymentRouter.js');
 // const stripeWebhookRouter = require('./routes/webhookrouter.js');
 
 //routes declaration
@@ -27,9 +27,9 @@ app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/subscription", subscriptionRouter);
 app.use("/api/v1/subscription_plan", subscriptionPlanRouter);
-app.use("/api/v1/stripe", stripePaymentRouter);
+app.use("/api/v1/cashfree", cashfreePaymentRouter);
 // app.use("/api/stripe/webhook", stripeWebhookRouter);
-// app.use("/success", orderRouter);
+app.use("/api/v1/order", orderRouter);
 
 // Middleware for error
 app.use(errorMiddleware);
