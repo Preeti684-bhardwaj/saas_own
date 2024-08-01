@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cookieParser=require('cookie-parser')
 const cors = require("cors");
 const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
@@ -10,6 +11,7 @@ const corsOptions = {
     optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
+app.use(cookieParser())
 app.use(express.static("public"));
 app.use(express.json());
 app.use(bodyParser.json());
