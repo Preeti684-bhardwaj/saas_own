@@ -88,14 +88,14 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
   }
 });
 
-const getStatus=asyncHandler(async(req,res,next)=>{
-  const orderId=req.params.order_id
-   console.log(orderId);
-  try{
-    const options={
-      method:'GET',
-      url:`https://sandbox.cashfree.com/pg/orders/${orderId}`,
-      headers:{
+const getStatus = asyncHandler(async (req, res, next) => {
+  const orderId = req.params.order_id;
+  console.log(orderId);
+  try {
+    const options = {
+      method: 'GET',
+      url: `https://sandbox.cashfree.com/pg/orders/${orderId}`,
+      headers: {
         accept: "application/json",
         "Content-Type": "application/json",
         "x-api-version": API_Version,
@@ -103,25 +103,35 @@ const getStatus=asyncHandler(async(req,res,next)=>{
         "x-client-secret": XClientSecret
       }
     };
+
     axios
-    .request(options)
-    .then((response)=>{
-      console.log(response.data);
-      if(response.data.order_status==="PAID"){
-        return res.status(301).redirect('https://new-video-editor.vercel.app/listings')
-      }else if(response.data.order_status==="ACTIVE"){
-        return res.status(301).redirect(`http://localhost:3000/${response.data.payment_session_id}`)
-      }else{
-        return res.status(400).redirect('https://aiengage.xircular.io/failure')
-      }
-    })
-    .catch((error)=>{
-      return console.error(error);
-    })
-  }catch(error){
-   res.status(500).send({status:false,message:error.message})
+      .request(options)
+      .then((response) => {
+        console.log(response.data);
+        const accessToken = req.headers['authorization']; // Assuming the access token is in the authorization header
+
+        // Set the access token as a cookie
+        res.cookie('accessToken', accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production', // Only use HTTPS in production
+          sameSite: 'Strict'
+        });
+
+        if (response.data.order_status === "PAID") {
+          return res.status(301).redirect('https://new-video-editor.vercel.app/listings');
+        } else if (response.data.order_status === "ACTIVE") {
+          return res.status(301).redirect(`http://localhost:3000/${response.data.payment_session_id}`);
+        } else {
+          return res.status(400).redirect('https://aiengage.xircular.io/failure');
+        }
+      })
+      .catch((error) => {
+        return console.error(error);
+      });
+  } catch (error) {
+    res.status(500).send({ status: false, message: error.message });
   }
-})
+});
 
 // get session detail
 const getSessionDetails = asyncHandler(async (req, res, next) => {
