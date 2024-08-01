@@ -90,7 +90,8 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
 
 const getStatus = asyncHandler(async (req, res, next) => {
   const orderId = req.params.order_id;
-  const accessToken = req.headers['authorization']; // Extract the access token from the request headers
+  const accessToken = req.headers['authorization'];
+  console.log(accessToken); // Extract the access token from the request headers
 
   console.log(orderId);
   try {
@@ -115,7 +116,7 @@ const getStatus = asyncHandler(async (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
       sameSite: 'None', // For cross-site cookies
-      domain: '.new-video-editor.vercel.app' // Ensure this domain matches your cookie needs
+      // domain: '.new-video-editor.vercel.app' // Ensure this domain matches your cookie needs
     });
 
     if (response.data.order_status === "PAID") {
