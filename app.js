@@ -5,7 +5,10 @@ const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: 'https://new-video-editor.vercel.app', // Adjust as necessary
+    credentials: true,
+  }));
 app.use(express.static("public"));
 app.use(express.json());
 app.use(bodyParser.json());
