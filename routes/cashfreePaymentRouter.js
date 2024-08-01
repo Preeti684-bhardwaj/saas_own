@@ -13,7 +13,7 @@ const db = require("../db/dbConnection");
 
 // Checkout session
 router.post("/create-checkout-session", cashfreePayment);
-router.get("/getStatus",getStatus)
+router.get("/getStatus/:orderId",getStatus)
 router.get("/get-session", getSessionDetails);
 
 // Setup webhook
