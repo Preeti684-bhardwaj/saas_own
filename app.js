@@ -9,7 +9,7 @@ const corsOptions = {
     credentials: true,
     optionsSuccessStatus: 200
 };
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.static("public"));
 app.use(express.json());
 app.use(bodyParser.json());

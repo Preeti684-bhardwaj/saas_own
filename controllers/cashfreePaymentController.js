@@ -90,8 +90,6 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
 
 const getStatus = asyncHandler(async (req, res, next) => {
   const orderId = req.params.order_id;
- const accessToken=req.params.accessToken
- console.log(accessToken);
   console.log(orderId);
   try {
     const options = {
@@ -102,8 +100,7 @@ const getStatus = asyncHandler(async (req, res, next) => {
         "Content-Type": "application/json",
         "x-api-version": API_Version,
         "x-client-id": XClientId,
-        "x-client-secret": XClientSecret,
-        'Authorization': accessToken // Use the access token in the request headers
+        "x-client-secret": XClientSecret // Use the access token in the request headers
       }
     };
 
@@ -111,12 +108,12 @@ const getStatus = asyncHandler(async (req, res, next) => {
     console.log(response.data);
 
     // Set the access token as a cookie
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
-      sameSite: 'None', // For cross-site cookies
-      // domain: '.new-video-editor.vercel.app' // Ensure this domain matches your cookie needs
-    });
+    // res.cookie('accessToken', accessToken, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
+    //   sameSite: 'None', // For cross-site cookies
+    //   // domain: '.new-video-editor.vercel.app' // Ensure this domain matches your cookie needs
+    // });
 
     if (response.data.order_status === "PAID") {
       return res.status(301).redirect('https://new-video-editor.vercel.app/listings');

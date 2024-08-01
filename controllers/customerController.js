@@ -321,6 +321,13 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     //  generate token
     const token = generateToken(obj);
 
+    res.cookie('accessToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
+        sameSite: 'None', // For cross-site cookies
+        // domain: '.new-video-editor.vercel.app' // Ensure this domain matches your cookie needs
+      });
+
     res.status(200).send({
       id: customer.id,
       email: customer.email,
