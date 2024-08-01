@@ -5,7 +5,7 @@ const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://new-video-editor.vercel.app'],
+    origin: ['http://localhost:3000', 'https://new-video-editor.vercel.app','https://aiengage.xircular.io'],
     credentials: true,
     optionsSuccessStatus: 200
 };
