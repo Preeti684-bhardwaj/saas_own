@@ -115,7 +115,7 @@ const getStatus = asyncHandler(async (req, res, next) => {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production', // Only use HTTPS in production
           sameSite: 'None', // For cross-site cookie
-          domain:'https://new-video-editor.vercel.app/'
+          domain:'.new-video-editor.vercel.app'
         });
 
         if (response.data.order_status === "PAID") {
