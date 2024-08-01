@@ -3,7 +3,7 @@ const Customer = db.customers;
 const asyncHandler = require("../utils/asyncHandler.js");
 const ErrorHandler = require("../utils/errorHandler.js");
 const bcrypt = require("bcrypt");
-const {Op}=require("sequelize");
+const { Op } = require("sequelize");
 const sendEmail = require("../utils/sendEmail.js");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
@@ -39,7 +39,6 @@ const generateOtp = () => {
   return otp;
 };
 
-
 // Helper function to generate API key
 const generateApiKey = () => {
   return crypto.randomBytes(32).toString("hex");
@@ -48,7 +47,7 @@ const generateApiKey = () => {
 // -----------------CUSTOMER SIGNUP-----------------------------------------------------
 const customerSignup = asyncHandler(async (req, res, next) => {
   try {
-    const {name, email, password, phone } = req.body;
+    const { name, email, password, phone } = req.body;
     if (!email) {
       return next(new ErrorHandler("email is missing", 400));
     }
@@ -81,56 +80,61 @@ const customerSignup = asyncHandler(async (req, res, next) => {
           "Name should be greater than 3 characters and less than 40 characters and should not start with number",
       });
     }
-  // Convert the email to lowercase for case-insensitive comparison
-  const lowercaseEmail = email.toLowerCase();
+    // Convert the email to lowercase for case-insensitive comparison
+    const lowercaseEmail = email.toLowerCase();
 
-  // Use a case-insensitive query to check for existing email
-  const existingUser = await Customer.findOne({
-    where: {
-      [Op.or]: [{ email: email.toLowerCase() }, { phone }]
+    // Use a case-insensitive query to check for existing email
+    const existingUser = await Customer.findOne({
+      where: {
+        [Op.or]: [{ email: email.toLowerCase() }, { phone }],
+      },
+    });
+
+    if (existingUser) {
+      if (
+        existingUser.email.toLowerCase() === email.toLowerCase() &&
+        existingUser.phone === phone
+      ) {
+        return res
+          .status(400)
+          .send({ message: "Both email and phone number are already in use" });
+      } else if (existingUser.email.toLowerCase() === email.toLowerCase()) {
+        return res.status(400).send({ message: "Email already in use" });
+      } else {
+        return res.status(400).send({ message: "Phone number already in use" });
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const emailToken = generateToken({ email: lowercaseEmail }); // Using lowercase email for token
+
+    const customer = await Customer.create({
+      name,
+      email: lowercaseEmail, // Store email in lowercase
+      password: hashedPassword,
+      phone,
+      emailToken,
+      // Additional fields as necessary
+    });
+
+    //sendVerificationEmail(lowercaseEmail, emailToken);
+
+    res.status(201).send({
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      // Add additional fields as necessary
+    });
+  } catch (error) {
+    return next(
+      new ErrorHandler(
+        error.message || "Some error occurred during signup.",
+        500
+      )
+    );
   }
-  });
-
-  if (existingUser) {
-    if (existingUser.email.toLowerCase() === email.toLowerCase() && existingUser.phone === phone) {
-      return res.status(400).send({ message: "Both email and phone number are already in use" });
-  } else if (existingUser.email.toLowerCase() === email.toLowerCase()) {
-      return res.status(400).send({ message: "Email already in use" });
-  } else {
-      return res.status(400).send({ message: "Phone number already in use" });
-  }
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const emailToken = generateToken({ email: lowercaseEmail }); // Using lowercase email for token
-
-  const customer = await Customer.create({
-    name,
-    email: lowercaseEmail, // Store email in lowercase
-    password: hashedPassword,
-    phone,
-    emailToken,
-    // Additional fields as necessary
-  });
-
-  //sendVerificationEmail(lowercaseEmail, emailToken);
-
-  res.status(201).send({
-    id: customer.id,
-    name:customer.name,
-    email: customer.email,
-    // Add additional fields as necessary
-  });
-} catch (error) {
-  return next(
-    new ErrorHandler(
-      error.message || "Some error occurred during signup.",
-      500
-    )
-  );
-}
 });
-    // ===========
+// ===========
 //     const existingUser = await Customer.findOne({ where: { email } });
 
 //     if (existingUser) {
@@ -165,7 +169,7 @@ const customerSignup = asyncHandler(async (req, res, next) => {
 //   }
 // });
 // ----------------send otp-----------------------------
-const sendOtp =asyncHandler(async (req, res, next) => {
+const sendOtp = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
 
   if (!email) {
@@ -216,69 +220,67 @@ const sendOtp =asyncHandler(async (req, res, next) => {
       return res.status(500).send(emailError.message);
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).send(error.message);
   }
 });
 // ==========================email verification------------------------------
 const emailOtpVerification = asyncHandler(async (req, res) => {
-    const { email, otp } = req.body;
+  const { email, otp } = req.body;
 
-    // Validate the OTP
-    if (!email) {
-      return next(new ErrorHandler("email is missing", 400));
-    }
-    if (!otp) {
-      return res
-        .status(400)
-        .json({ success: false, message: "OTP is required." });
-    }
+  // Validate the OTP
+  if (!email) {
+    return next(new ErrorHandler("email is missing", 400));
+  }
+  if (!otp) {
+    return res
+      .status(400)
+      .json({ success: false, message: "OTP is required." });
+  }
 
-    try {
-      const customer = await Customer.findOne({ where: { email:email } });
-      console.log(customer);
-      if (!customer) {
-        return res.status(400).json({
-          success: false,
-          message: "Customer not found or invalid details.",
-        });
-      }
-
-      // Check OTP validity
-      if (customer.otp !== otp) {
-        return res.status(400).json({ success: false, message: "Invalid OTP" });
-      }
-      if (customer.otpExpire < Date.now()) {
-        return res
-          .status(400)
-          .json({ success: false, message: "expired OTP." });
-      }
-
-      // Update agent details
-      customer.isEmailVerified = true;
-      customer.otp = null;
-      customer.otpExpire = null;
-      await customer.save();
-
-      res.status(201).json({
-        success: true,
-        message: "Customer data",
-        agent: {
-          id: customer.id,
-          name: customer.name,
-          email: customer.email,
-          phone: customer.phone,
-          isEmailVerified: customer.isEmailVerified,
-        },
-      });
-    } catch (error) {
-      res.status(500).json({
+  try {
+    const customer = await Customer.findOne({ where: { email: email } });
+    console.log(customer);
+    if (!customer) {
+      return res.status(400).json({
         success: false,
-        message: "Server Error",
-        error: error.message,
+        message: "Customer not found or invalid details.",
       });
     }
-  });
+
+    // Check OTP validity
+    if (customer.otp !== otp) {
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
+    }
+    if (customer.otpExpire < Date.now()) {
+      return res.status(400).json({ success: false, message: "expired OTP." });
+    }
+
+    // Update agent details
+    customer.isEmailVerified = true;
+    customer.otp = null;
+    customer.otpExpire = null;
+    await customer.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Customer data",
+      agent: {
+        id: customer.id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        isEmailVerified: customer.isEmailVerified,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+});
 // -----------------CUSTOMER SIGNIN-----------------------------------------------------
 const customerSignin = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -299,7 +301,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     //    return res.status(401).json({ message: "Customer not found" });
     //}
     if (!customer.isEmailVerified) {
-       return res.status(401).json({ message: "Email not verified" });
+      return res.status(401).json({ message: "Email not verified" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, customer.password);
@@ -320,13 +322,11 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     }
     //  generate token
     const token = generateToken(obj);
-
-    res.cookie('accessToken', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
-        sameSite: 'None', // For cross-site cookies
-        // domain: '.new-video-editor.vercel.app' // Ensure this domain matches your cookie needs
-      });
+    res.cookie("access_token", token, {
+      httpOnly: true,
+      sameSite: "Lax",
+      expires: new Date(Date.now() + 30 * 60 * 1000),
+    });
 
     res.status(200).send({
       id: customer.id,
@@ -374,7 +374,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     }
 
     // Generate reset token and expiration time
-    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetToken = crypto.randomBytes(32).toString("hex");
     customer.resetToken = resetToken;
     customer.resetTokenExpire = Date.now() + 15 * 60 * 1000; // Set expiration time (15 minutes)
 
@@ -411,7 +411,9 @@ const resetPassword = asyncHandler(async (req, res) => {
   const { token } = req.params; // The token from the URL
 
   if (!password || !token) {
-    return res.status(400).send({ message: "Missing required fields: password or token" });
+    return res
+      .status(400)
+      .send({ message: "Missing required fields: password or token" });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -470,7 +472,6 @@ const getUserById = asyncHandler(async (req, res, next) => {
   }
 });
 
-
 // ====================trial period====================================================
 
 const freeTrial = asyncHandler(async (req, res, next) => {
@@ -505,7 +506,7 @@ const freeTrial = asyncHandler(async (req, res, next) => {
 
     // Set the freeTrialFeature values
     customer.freeTrialFeature = {
-      "totalResponse": 2, // Example value, set according to your needs
+      totalResponse: 2, // Example value, set according to your needs
       // videoLength: 30, // Example value in minutes
       // campaignStorage: 500, // Example value in MB
     };
