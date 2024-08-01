@@ -114,7 +114,7 @@ const getStatus = asyncHandler(async (req, res, next) => {
         res.cookie('accessToken', accessToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production', // Only use HTTPS in production
-          sameSite: 'Strict'
+          sameSite: 'None', // For cross-site cookie
         });
 
         if (response.data.order_status === "PAID") {
