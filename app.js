@@ -4,7 +4,11 @@ const cors = require("cors");
 const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
-
+const corsOptions = {
+    origin: ['http://localhost:3000', 'https://new-video-editor.vercel.app'],
+    credentials: true,
+    optionsSuccessStatus: 200
+};
 app.use(cors());
 app.use(express.static("public"));
 app.use(express.json());
