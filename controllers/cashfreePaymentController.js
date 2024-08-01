@@ -7,27 +7,13 @@ const { XClientId, XClientSecret, API_Version, API_URL } = process.env;
 
 const cashfreePayment = asyncHandler(async (req, res, next) => {
   try {
-    const {
-      orderId,
-      userName,
-      phone,
-      userId,
-      planPrice,
-    } = req.body;
+    const { orderId, userName, phone, userId, planPrice } = req.body;
 
-    if (
-      !orderId ||
-      !userName ||
-      !phone ||
-      !userId ||
-      !planPrice
-    ) {
+    if (!orderId || !userName || !phone || !userId || !planPrice) {
       return next(new errorHandler("Missing required fields", 400));
     }
     if (typeof planPrice !== "number" || planPrice <= 0) {
-      return next(
-        new errorHandler("Plan price must be a positive number", 400)
-      );
+      return next(new errorHandler("Plan price must be a positive number", 400));
     }
     const option = {
       method: "POST",
@@ -46,56 +32,41 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
         customer_details: {
           customer_id: userId,
           customer_phone: phone,
-          // "customer_name": userName,
           customer_email: userName,
         },
         order_meta: {
-          // return_url:
-          //   "https://www.cashfree.com/devstudio/preview/pg/web/checkout?order_id={order_id}",
-          notify_url:
-            "https://webhook.site/3a7007c2-c21e-4871-b275-e13979f3a115",
-          payment_methods:
-            "cc,dc,ppc,ccc,emi,paypal,upi,nb,app,paylater",
+          notify_url: "https://webhook.site/3a7007c2-c21e-4871-b275-e13979f3a115",
+          payment_methods: "cc,dc,ppc,ccc,emi,paypal,upi,nb,app,paylater",
         },
       },
     };
     axios
       .request(option)
       .then((response) => {
-        res.status(200).send({ status: true, data: response.data.payment_session_id});
+        res.status(200).send({ status: true, data: response.data.payment_session_id });
         console.log("Order created successfully:", response.data);
       })
       .catch((error) => {
-        console.error(
-          "Error:",
-          error.response ? error.response.data.message : error.message
-        );
+        console.error("Error:", error.response ? error.response.data.message : error.message);
       });
   } catch (error) {
     console.error("Stripe payment error:", error);
-
     if (error.type === "StripeCardError") {
       return next(new errorHandler(error.message, 400));
     }
-
-    return next(
-      new errorHandler(
-        error.message ||
-          "Some error occurred while creating the Stripe session.",
-        500
-      )
-    );
+    return next(new errorHandler(error.message || "Some error occurred while creating the Stripe session.", 500));
   }
 });
 
-const getStatus=asyncHandler(async(req,res,next)=>{
-  const orderId=req.params.order_id
-   console.log(orderId);
-  try{
-    const options={
-      method:'GET',
-      url:`https://sandbox.cashfree.com/pg/orders/${orderId}`,
-      headers:{
+const getStatus = asyncHandler(async (req, res, next) => {
+  const orderId = req.params.order_id;
+  const accessToken = req.query.accessToken;
+  console.log(orderId);
+  try {
+    const options = {
+      method: 'GET',
+      url: `https://sandbox.cashfree.com/pg/orders/${orderId}`,
+      headers: {
         accept: "application/json",
         "Content-Type": "application/json",
         "x-api-version": API_Version,
@@ -103,26 +74,35 @@ const getStatus=asyncHandler(async(req,res,next)=>{
         "x-client-secret": XClientSecret
       }
     };
-    axios
-    .request(options)
-    .then((response)=>{
-      console.log(response.data);
-      if(response.data.order_status==="PAID"){
-        return res.status(301).redirect('https://new-video-editor.vercel.app/listings')
-      }else if(response.data.order_status==="ACTIVE"){
-        return res.status(301).redirect(`http://localhost:3000/${response.data.payment_session_id}`)
-      }else{
-        return res.status(400).redirect('https://aiengage.xircular.io/failure')
-      }
-    })
-    .catch((error)=>{
-      return console.error(error);
-    })
-  }catch(error){
-   res.status(500).send({status:false,message:error.message})
-  }
-})
+    
+    const response = await axios.request(options);
+    console.log(response.data);
+    
+    let redirectUrl;
+    if (response.data.order_status === "PAID") {
+      redirectUrl = 'https://new-video-editor.vercel.app/listings';
+    } else if (response.data.order_status === "ACTIVE") {
+      redirectUrl = `http://localhost:3000/${response.data.payment_session_id}`;
+    } else {
+      redirectUrl = 'https://aiengage.xircular.io/failure';
+    }
 
+    // Send an HTML response with JavaScript to post a message and then redirect
+    res.send(`
+      <html>
+        <body>
+          <script>
+            window.opener.postMessage('payment_completed', '*');
+            window.location.href = '${redirectUrl}';
+          </script>
+        </body>
+      </html>
+    `);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ status: false, message: error.message });
+  }
+});
 // get session detail
 const getSessionDetails = asyncHandler(async (req, res, next) => {
   try {
