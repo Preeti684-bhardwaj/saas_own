@@ -6,18 +6,18 @@ const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
 const corsOptions = {
-    origin: [
-      'http://localhost:3000',
-      'https://new-video-editor.vercel.app',
-      'https://aiengage.xircular.io',
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'withcredentials'],
-  };
-  
-  app.use(cors(corsOptions));
-  app.options('*', cors(corsOptions)); // Preflight requests
+  origin: [
+    "http://localhost:3000",
+    "https://new-video-editor.vercel.app",
+    "https://aiengage.xircular.io",
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization", "withcredentials"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Preflight requests
 app.use(cookieParser());
 app.use(express.static("public"));
 app.use(express.json());
