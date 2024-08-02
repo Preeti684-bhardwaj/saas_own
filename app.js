@@ -5,8 +5,7 @@ const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
 const cors = require("cors");
-const allowedOrigins =['https://aiengage.xircular.io']
-  
+const allowedOrigins =['https://aiengage.xircular.io','https://new-video-editor.vercel.app']
 
 app.use(cors({
     origin: (origin, callback) => {
