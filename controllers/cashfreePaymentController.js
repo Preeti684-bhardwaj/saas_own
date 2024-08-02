@@ -118,7 +118,7 @@ const getStatus = asyncHandler(async (req, res, next) => {
     if (response.data.order_status === "PAID") {
       return res.status(301).redirect('https://new-video-editor.vercel.app/listings');
     } else if (response.data.order_status === "ACTIVE") {
-      return res.status(301).redirect(`http://localhost:3000/${response.data.payment_session_id}`);
+      return res.status(301).redirect(`https://aiengage.xircular.io/${response.data.payment_session_id}`);
     } else {
       return res.status(400).redirect('https://aiengage.xircular.io/failure');
     }
