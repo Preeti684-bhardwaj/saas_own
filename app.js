@@ -5,13 +5,20 @@ const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
 const cors = require("cors");
-const corsOptions = {
-    origin: 'https://aiengage.xircular.io',
-    credentials: true,
-    optionsSuccessStatus: 200
-};
+const allowedOrigins =['https://aiengage.xircular.io']
+  
 
-app.use(cors(corsOptions));
+app.use(cors({
+    origin: (origin, callback) => {
+      console.log("origin coming",origin)
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true // Allow cookies to be sent and received
+  }));
 
 // Add this line to handle OPTIONS requests
 // app.options("*", cors(corsOptions));
