@@ -4,13 +4,28 @@ const cookieParser = require("cookie-parser");
 const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
 const corsOptions = {
-  origin: "http://localhost:3000",
-  credentials: true
+  origin: [
+    "http://localhost:3000",
+    "https://new-video-editor.vercel.app",
+    "https://aiengage.xircular.io",
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Add this line
+  allowedHeaders: ["Content-Type", "Authorization"], // Add this line
 };
-app.use(cors(corsOptions)); // Preflight requests
-// app.options('*', cors(corsOptions));
+
+app.use(cors(corsOptions));
+// Add this line to handle OPTIONS requests
+app.options("*", cors(corsOptions));
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+   next();
+  });
 app.use(cookieParser());
 app.use(express.static("public"));
 app.use(express.json());
