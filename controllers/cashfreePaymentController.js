@@ -101,7 +101,7 @@ const getStatus = asyncHandler(async (req, res, next) => {
         "x-api-version": API_Version,
         "x-client-id": XClientId,
         "x-client-secret": XClientSecret // Use the access token in the request headers
-      }
+      },
     };
 
     const response = await axios.request(options);
