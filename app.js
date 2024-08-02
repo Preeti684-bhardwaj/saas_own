@@ -6,17 +6,10 @@ require("dotenv").config({ path: "./.env" });
 const app = express();
 const cors = require('cors');
 const corsOptions = {
-  origin: ["http://localhost:3000", "https://new-video-editor.vercel.app", "https://aiengage.xircular.io"],
+  origin: "http://localhost:3000",
   credentials: true
 };
 app.use(cors(corsOptions)); // Preflight requests
-app.use((req, res, next) => {
-    res.on('header', () => {
-      console.log('Access-Control-Allow-Credentials:', res.get('Access-Control-Allow-Credentials'));
-      console.log('Access-Control-Allow-Origin:', res.get('Access-Control-Allow-Origin'));
-    });
-    next();
-  });
 // app.options('*', cors(corsOptions));
 app.use(cookieParser());
 app.use(express.static("public"));
