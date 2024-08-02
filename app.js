@@ -1,22 +1,29 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cookieParser=require('cookie-parser')
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
-const allowedOrigins =['http://localhost:3000', 'https://new-video-editor.vercel.app','https://aiengage.xircular.io']
-app.use(cors({
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://new-video-editor.vercel.app",
+  "https://aiengage.xircular.io",
+];
+app.use(
+  cors({
     origin: (origin, callback) => {
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true // Allow cookies to be sent and received
-  }));
-app.use(cookieParser())
+    credentials: true, // Allow cookies to be sent and received
+  })
+);
+
+app.use(cookieParser());
 app.use(express.static("public"));
 app.use(express.json());
 app.use(bodyParser.json());
@@ -29,7 +36,7 @@ const productRouter = require("./routes/productRouter.js");
 const subscriptionRouter = require("./routes/subscriptionRouter.js");
 const subscriptionPlanRouter = require("./routes/subscriptionPlanRouter.js");
 const orderRouter = require("./routes/orderRouter.js");
-const cashfreePaymentRouter = require('./routes/cashfreePaymentRouter.js');
+const cashfreePaymentRouter = require("./routes/cashfreePaymentRouter.js");
 // const stripeWebhookRouter = require('./routes/webhookrouter.js');
 
 //routes declaration

@@ -325,9 +325,11 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     res.cookie("access_token", token, {
       httpOnly: true,
       sameSite: "None",
-      path:'/',
+      // secure: true, 
+      path: '/',
       expires: new Date(Date.now() + 30 * 60 * 1000),
     });
+    console.log("Cookie set:", token);
 
     res.status(200).send({
       id: customer.id,
