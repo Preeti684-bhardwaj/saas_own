@@ -6,7 +6,7 @@ const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
 const allowedOrigins = [
-  "http://localhost:3000",
+//   "http://localhost:3000",
   "https://new-video-editor.vercel.app",
   "https://aiengage.xircular.io",
 ];
