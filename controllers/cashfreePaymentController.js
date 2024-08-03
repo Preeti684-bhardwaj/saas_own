@@ -41,7 +41,7 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
       },
       data: {
         order_amount: planPrice,
-        order_currency: "INR",
+        order_currency: "USD",
         order_id: orderId,
         customer_details: {
           customer_id: userId,
