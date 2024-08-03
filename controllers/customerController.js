@@ -323,11 +323,11 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     //  generate token
     const token = generateToken(obj);
     res.cookie("access_token", token, {
-      // httpOnly: false,
-      sameSite: "None", // Change this to "None" for cross-site requests
-      secure: true,  // Enable this for HTTPS
+      httpOnly: false,  // Allow JavaScript access
+      sameSite: "None", // For cross-site requests
+      secure: true,     // Enable for HTTPS
       path: '/',
-      expires: new Date(Date.now() + 30 *60*1000),
+      expires: new Date(Date.now() + 30 * 60 * 1000),
     });
 
     res.status(200).send({
