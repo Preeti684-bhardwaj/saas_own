@@ -324,7 +324,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     const token = generateToken(obj);
     res.cookie("access_token", token, {
       httpOnly: false,  // Allow JavaScript access
-      sameSite: "None", // For cross-site requests
+      sameSite: "Strict", // For cross-site requests
       secure: true,     // Enable for HTTPS
       path: '/',
       expires: new Date(Date.now() + 30 * 60 * 1000),
