@@ -8,6 +8,7 @@ const { JWT_SECRET } = process.env;
 const authenticate = function (req, res, next) {
   try {
     console.log("Cookies:", req.cookies);
+    console.log("headers",req.headers);
     let token = req.cookies.access_token;
 
     // Check if token is in Authorization header if not in cookies
