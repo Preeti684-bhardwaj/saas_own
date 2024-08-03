@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { customerSignup,getUserById,customerSignin,forgotPassword,resetPassword , freeTrial, sendOtp, emailOtpVerification } = require("../controllers/customerController");
+const { customerSignup,getUserById,logOut,customerSignin,forgotPassword,resetPassword , freeTrial, sendOtp, emailOtpVerification } = require("../controllers/customerController");
 const {
 //   validateCreateCustomer,
   validateSignup,
@@ -20,6 +20,7 @@ router.get("/getUser/:userId",getUserById)
 router.post("/emailVerification",emailOtpVerification)
 router.post("/forgotpassword",forgotPassword);
 router.post("/resetpassword/:token",resetPassword);
+router.post('/logout',logOut)
 router.get('/startTrial',authenticate,authorize(['CUSTOMER']),freeTrial);
 // router.get("/verifyemail", validateVerifyEmail, customers.verifyEmail);
 // router.get("/:id", validateFindOneCustomer, customers.findOne);

@@ -522,6 +522,14 @@ const freeTrial = asyncHandler(async (req, res, next) => {
     res.status(500).send("Internal server error");
   }
 });
+const logOut=asyncHandler(async(req,res,next)=>{
+  res.clearCookie("access_token", {
+    sameSite: "None",
+    secure: true,
+    path: '/',
+  });
+  res.sendStatus(200);
+})
 
 module.exports = {
   customerSignup,
@@ -532,4 +540,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   freeTrial,
+  logOut
 };

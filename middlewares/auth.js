@@ -7,26 +7,23 @@ const { JWT_SECRET } = process.env;
 //authentication
 const authenticate = function (req, res, next) {
   try {
-    console.log(req.cookies);
-    const token = req.cookies.access_token;
-    // token = token.replace("Bearer", "").trim();
-console.log(token);
-    if (!token)
-      return res
-        .status(401)
-        .send({ status: false, message: "Please provide token" });
-    let decodedToken = jwt.verify(token, JWT_SECRET);
-    req.decodedToken = decodedToken;
-    console.log(req.decodedToken.obj.obj.id)
-    next();
-  } catch (error) {
-    if (error.message == "Invalid token") {
-      return res
-        .status(401)
-        .send({ status: false, message: "Enter valid token" });
+      console.log("Headers: ", req.headers); // Log all headers
+      console.log("Cookies: ", req.cookies); // Log cookies
+      const token = req.cookies.access_token;
+      console.log("Token: ", token); // Log token
+      if (!token) {
+        return res.status(401).send({ status: false, message: "Please provide token" });
+      }
+      let decodedToken = jwt.verify(token, JWT_SECRET);
+      req.decodedToken = decodedToken;
+      console.log(req.decodedToken.obj.obj.id);
+      next();
+    } catch (error) {
+      if (error.message == "Invalid token") {
+        return res.status(401).send({ status: false, message: "Enter valid token" });
+      }
+      return res.status(500).send({ status: false, message: error.message });
     }
-    return res.status(500).send({ status: false, message: error.message });
-  }
 };
 
 //authorisation
