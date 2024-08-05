@@ -320,9 +320,18 @@ const customerSignin = asyncHandler(async (req, res, next) => {
       // Update the customer record with the new API key
       await customer.update({ api_key: apiKey });
     }
+    const options={
+      expires:new Date(Date.now()+15*24*60*60*1000),
+      httpOnly:false,
+      secure:true,
+      sameSite:"none",
+      path:'/'
+    }
     //  generate token
     const token = generateToken(obj);
-    res.cookie("access_token", token).status(200).send({
+    res.status(200).cookie("access_token", token,options).send({
+      success:true,
+      message:"login successfully",
       id: customer.id,
       email: customer.email,
       token: token,
