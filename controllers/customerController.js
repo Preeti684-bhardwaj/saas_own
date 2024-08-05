@@ -328,9 +328,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
       secure: true,     // Enable for HTTPS
       path: '/',
       expires: new Date(Date.now() + 30 * 60 * 1000),
-    });
-
-    res.status(200).send({
+    }).status(200).send({
       id: customer.id,
       email: customer.email,
       token: token,
