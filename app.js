@@ -5,9 +5,9 @@ const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
 const cors = require("cors");
-const allowedOrigins =['https://aiengage.xircular.io','https://new-video-editor.vercel.app','https://stream.xircular.io',undefined ]
 
 app.use(cookieParser());
+const allowedOrigins =['https://aiengage.xircular.io','https://new-video-editor.vercel.app','https://stream.xircular.io',undefined ]
 app.use(cors({
     origin: (origin, callback) => {
       console.log("origin coming",origin)
