@@ -7,6 +7,7 @@ const app = express();
 const cors = require("cors");
 const allowedOrigins =['https://aiengage.xircular.io','https://new-video-editor.vercel.app','https://stream.xircular.io',undefined ]
 
+app.use(cookieParser());
 app.use(cors({
     origin: (origin, callback) => {
       console.log("origin coming",origin)
@@ -19,16 +20,6 @@ app.use(cors({
     credentials: true // Allow cookies to be sent and received
   }));
 
-// Add this line to handle OPTIONS requests
-// app.options("*", cors(corsOptions));
-// app.use((req, res, next) => {
-//     res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-//     res.header('Access-Control-Allow-Credentials', 'true');
-//     res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-//     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-//    next();
-//   });
-app.use(cookieParser());
 app.use(express.static("public"));
 app.use(express.json());
 app.use(bodyParser.json());
