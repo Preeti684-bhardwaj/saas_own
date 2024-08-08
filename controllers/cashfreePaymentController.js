@@ -12,8 +12,7 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
       userName,
       phone,
       userId,
-      planPrice,
-      accessToken
+      planPrice
     } = req.body;
 
     if (
@@ -22,7 +21,6 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
       !phone ||
       !userId ||
       !planPrice||
-      !accessToken
     ) {
       return next(new errorHandler("Missing required fields", 400));
     }
