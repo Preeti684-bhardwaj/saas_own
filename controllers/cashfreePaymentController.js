@@ -89,8 +89,8 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
 });
 
 const getStatus = asyncHandler(async (req, res, next) => {
-  const orderId = req.query.order_id;
-  const access_token=req.params.accessToken
+  const orderId = req.params.order_id;
+  const access_token=req.query.accessToken
   console.log(orderId);
   try {
     const options = {
