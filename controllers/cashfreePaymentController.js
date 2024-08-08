@@ -12,7 +12,8 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
       userName,
       phone,
       userId,
-      planPrice
+      planPrice,
+      accessToken
     } = req.body;
 
     if (
@@ -20,7 +21,8 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
       !userName ||
       !phone ||
       !userId ||
-      !planPrice
+      !planPrice||
+      !accessToken
     ) {
       return next(new errorHandler("Missing required fields", 400));
     }
@@ -50,6 +52,7 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
           customer_email: userName,
         },
         order_meta: {
+          accessToken:accessToken,
           // return_url:
           //   "https://www.cashfree.com/devstudio/preview/pg/web/checkout?order_id={order_id}",
           notify_url:
@@ -90,7 +93,6 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
 
 const getStatus = asyncHandler(async (req, res, next) => {
   const orderId = req.params.order_id;
-  const accessToken = req.query.accessToken;
   console.log(orderId);
   try {
     const options = {
@@ -102,7 +104,6 @@ const getStatus = asyncHandler(async (req, res, next) => {
         "x-api-version": API_Version,
         "x-client-id": XClientId,
         "x-client-secret": XClientSecret ,// Use the access token in the request headers
-        "Authorization": `Bearer ${accessToken}`
       },
       // Credential:true
     };
@@ -111,7 +112,7 @@ const getStatus = asyncHandler(async (req, res, next) => {
     console.log(response.data);
 
     if (response.data.order_status === "PAID") {
-      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings?${accessToken}`);
+      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings`);
     } else if (response.data.order_status === "ACTIVE") {
       return res.status(301).redirect(`https://aiengage.xircular.io/${response.data.payment_session_id}`);
     } else {
