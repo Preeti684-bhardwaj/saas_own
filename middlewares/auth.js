@@ -7,14 +7,10 @@ const { JWT_SECRET } = process.env;
 //authentication
 const authenticate = function (req, res, next) {
   try {
-    console.log("Cookies:", req.cookies);
-    console.log("headers",req.headers);
-    let token = req.cookies.access_token;
-    console.log("line of 13",token);
-    
-    // Check if token is in Authorization header if not in cookies
-    if (!token && req.headers.authorization) {
-      token = req.headers.authorization.split(" ")[1];
+    const token = req.headers["authorization"];
+    console.log(token);
+    if (!token) {
+      return res.status(401).send({ message: "No token provided." });
     }
 
     console.log("Token:", token);

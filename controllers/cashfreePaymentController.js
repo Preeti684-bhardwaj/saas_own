@@ -13,6 +13,7 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
       phone,
       userId,
       planPrice,
+      accessToken
     } = req.body;
 
     if (
@@ -20,7 +21,8 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
       !userName ||
       !phone ||
       !userId ||
-      !planPrice
+      !planPrice||
+      !accessToken
     ) {
       return next(new errorHandler("Missing required fields", 400));
     }
@@ -90,6 +92,7 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
 
 const getStatus = asyncHandler(async (req, res, next) => {
   const orderId = req.params.order_id;
+  const access_token=req.query.accessToken
   console.log(orderId);
   try {
     const options = {
@@ -102,21 +105,14 @@ const getStatus = asyncHandler(async (req, res, next) => {
         "x-client-id": XClientId,
         "x-client-secret": XClientSecret // Use the access token in the request headers
       },
+      // Credential:true
     };
 
     const response = await axios.request(options);
     console.log(response.data);
 
-    // Set the access token as a cookie
-    // res.cookie('accessToken', accessToken, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
-    //   sameSite: 'None', // For cross-site cookies
-    //   // domain: '.new-video-editor.vercel.app' // Ensure this domain matches your cookie needs
-    // });
-
     if (response.data.order_status === "PAID") {
-      return res.status(301).redirect('https://new-video-editor.vercel.app/listings');
+      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings?${access_token}`);
     } else if (response.data.order_status === "ACTIVE") {
       return res.status(301).redirect(`https://aiengage.xircular.io/${response.data.payment_session_id}`);
     } else {
