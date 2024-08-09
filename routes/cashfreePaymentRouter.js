@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   cashfreePayment,
   getStatus,
+  getAccessToken,
   getSessionDetails,
 } = require("../controllers/cashfreePaymentController");
 const bodyParser = require("body-parser");
@@ -10,17 +11,24 @@ const bodyParser = require("body-parser");
 // const { createSubscription } = require("../controllers/subscriptionController");
 // const { createTransaction } = require("../controllers/transactionController");
 const db = require("../db/dbConnection");
+import { Cashfree } from "cashfree-pg"; 
+const { XClientId, XClientSecret} = process.env;
+
+
+Cashfree.XClientId =XClientId ;
+Cashfree.XClientSecret =XClientSecret;
+Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
 
 // Checkout session
 router.post("/create-checkout-session", cashfreePayment);
-router.get("/getStatus/:order_id",getStatus)
+app.get('/order-status/:order_id', getAccessToken, getStatus);
 router.get("/get-session", getSessionDetails);
 
 // Setup webhook
-// router.post("/hook", express.raw({ type: "application/json" }), async (req, res) => {
-//   const sig = req.headers["stripe-signature"];
-//   let data;
-//   let eventType;
+// router.post("/hook", async (req, res) => {
+//   // const sig = req.headers["cashfree-signature"];
+//   // let data;
+//   // let eventType;
 
 //   try {
 //     if (endpointSecret) {

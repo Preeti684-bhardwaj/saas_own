@@ -50,9 +50,9 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
           customer_phone: phone,
           // "customer_name": userName,
           customer_email: userName,
+          accessToken:accessToken
         },
         order_meta: {
-          accessToken:accessToken,
           // return_url:
           //   "https://www.cashfree.com/devstudio/preview/pg/web/checkout?order_id={order_id}",
           notify_url:
@@ -90,9 +90,18 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
     );
   }
 });
+const getAccessToken = asyncHandler(async (req, res, next) => {
+  const { accessToken } = req.body;
+  if (!accessToken) {
+    return res.status(400).send({ status: false, message: "Access token is required" });
+  }
+  req.accessToken = accessToken; // Store the token in the request object for later use
+  next();
+});
 
 const getStatus = asyncHandler(async (req, res, next) => {
   const orderId = req.params.order_id;
+  const accessToken = req.accessToken;
   console.log(orderId);
   try {
     const options = {
@@ -112,7 +121,7 @@ const getStatus = asyncHandler(async (req, res, next) => {
     console.log(response.data);
 
     if (response.data.order_status === "PAID") {
-      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings`);
+      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings?${accessToken}`);
     } else if (response.data.order_status === "ACTIVE") {
       return res.status(301).redirect(`https://aiengage.xircular.io/${response.data.payment_session_id}`);
     } else {
@@ -150,5 +159,6 @@ const getSessionDetails = asyncHandler(async (req, res, next) => {
 module.exports = {
   cashfreePayment,
   getStatus,
+  getAccessToken,
   getSessionDetails,
 };

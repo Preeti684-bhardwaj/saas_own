@@ -20,7 +20,7 @@ const createSubscription = async (userId,features,frequency ,plan, price) => {
       // status: 'active',
       startDate,
       endDate,
-      price:price/100,
+      price:price,
     },{transaction});
     Customer.update(
       {
