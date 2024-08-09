@@ -21,7 +21,7 @@ Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
 
 // Checkout session
 router.post("/create-checkout-session", cashfreePayment);
-router.get('/order-status/:accessToken/:order_id', getStatus);
+router.get('/order-status/:order_id', getStatus);
 router.get("/get-session", getSessionDetails);
 
 // Setup webhook
