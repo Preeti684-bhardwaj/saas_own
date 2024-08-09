@@ -92,9 +92,11 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
 });
 
 const getStatus = asyncHandler(async (req, res, next) => {
-  const accessToken = req.params.accessToken
+  let token = req.cookies.access_token;
   const orderId = req.params.order_id;
   console.log(orderId);
+  console.log(token);
+  
   try {
     const options = {
       method: 'GET',
@@ -113,7 +115,7 @@ const getStatus = asyncHandler(async (req, res, next) => {
     console.log(response.data);
 
     if (response.data.order_status === "PAID") {
-      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings?${accessToken}`);
+      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings?${token}`);
     } else if (response.data.order_status === "ACTIVE") {
       return res.status(301).redirect(`https://aiengage.xircular.io/${response.data.payment_session_id}`);
     } else {
