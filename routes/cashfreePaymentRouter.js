@@ -27,8 +27,10 @@ router.get("/get-session", getSessionDetails);
 // Setup webhook
 router.post('/webhook',  (req, res)=> {
   try {
-      Cashfree.PGVerifyWebhookSignature(req.headers["x-webhook-signature"], req.rawBody, req.headers["x-webhook-timestamp"])
-  } catch (err) {
+     const data = Cashfree.PGVerifyWebhookSignature(req.headers["x-webhook-signature"], req.rawBody, req.headers["x-webhook-timestamp"])
+  console.log(data);
+  
+    } catch (err) {
       console.log(err.message)
   }
 })
