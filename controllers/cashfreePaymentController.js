@@ -3,6 +3,7 @@ const dotenv = require("dotenv").config();
 const asyncHandler = require("../utils/asyncHandler");
 const errorHandler = require("../utils/errorHandler");
 const axios = require("axios");
+// const { Base64 } = require('js-base64');
 const { XClientId, XClientSecret, API_Version, API_URL } = process.env;
 
 const cashfreePayment = asyncHandler(async (req, res, next) => {
@@ -92,9 +93,13 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
 });
 
 const getStatus = asyncHandler(async (req, res, next) => {
-  const orderId = req.params.order_id;
-  const token = req.headers["authorization"];
-  console.log(orderId);
+  const encodedOrderId = req.params.order_id;
+  
+  // Extract the actual order ID and access token
+  const [orderId, encodedToken] = encodedOrderId.split('_');
+  const accessToken = Base64.decode(encodedToken);
+  console.log("Order ID:", orderId);
+  console.log("Access Token:", accessToken);
   try {
     const options = {
       method: 'GET',
@@ -113,7 +118,7 @@ const getStatus = asyncHandler(async (req, res, next) => {
     console.log(response.data);
 
     if (response.data.order_status === "PAID") {
-      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings?${token}`);
+      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings?${accessToken}`);
     } else if (response.data.order_status === "ACTIVE") {
       return res.status(301).redirect(`https://aiengage.xircular.io/${response.data.payment_session_id}`);
     } else {
