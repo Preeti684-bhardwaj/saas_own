@@ -1,12 +1,13 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
 const cors = require("cors");
-
-// app.use(cookieParser());
+app.use(cookieParser());
 const allowedOrigins =['https://aiengage.xircular.io','https://new-video-editor.vercel.app','http://localhost:3000',undefined ]
+
 app.use(cors({
     origin: (origin, callback) => {
       console.log("origin coming",origin)
@@ -15,7 +16,8 @@ app.use(cors({
       } else {
         callback(new Error('Not allowed by CORS'));
       }
-    }
+    },
+    credentials: true // Allow cookies to be sent and received
   }));
 
 app.use(express.static("public"));
