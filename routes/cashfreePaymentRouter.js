@@ -6,18 +6,18 @@ const {
   getAccessToken,
   getSessionDetails,
 } = require("../controllers/cashfreePaymentController");
-const bodyParser = require("body-parser");
+// const bodyParser = require("body-parser");
 // const { createOrder} = require("../controllers/orderController");
 // const { createSubscription } = require("../controllers/subscriptionController");
 // const { createTransaction } = require("../controllers/transactionController");
-const db = require("../db/dbConnection");
-import { Cashfree } from "cashfree-pg"; 
-const { XClientId, XClientSecret} = process.env;
+// const db = require("../db/dbConnection");
+// import { Cashfree } from "cashfree-pg"; 
+// const { XClientId, XClientSecret} = process.env;
 
 
-Cashfree.XClientId =XClientId ;
-Cashfree.XClientSecret =XClientSecret;
-Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
+// Cashfree.XClientId =XClientId ;
+// Cashfree.XClientSecret =XClientSecret;
+// Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
 
 // Checkout session
 router.post("/create-checkout-session", cashfreePayment);
