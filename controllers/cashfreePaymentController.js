@@ -20,7 +20,7 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
       !userName ||
       !phone ||
       !userId ||
-      !planPrice||
+      !planPrice
     ) {
       return next(new errorHandler("Missing required fields", 400));
     }
