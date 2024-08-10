@@ -20,7 +20,7 @@ const createSubscription = async (userId,features,frequency ,plan, price) => {
       // status: 'active',
       startDate,
       endDate,
-      price:price,
+      price:price/100,
     },{transaction});
     Customer.update(
       {
@@ -117,7 +117,7 @@ const FindBysubscriptions = async (req, res) => {
   // const { userId} = req.query; // Extract frequency from request body
 // console.log(req.decodedToken.obj.obj.id);
   try {
-    const subscriptions = await Customer.findOne({
+    const subscriptions = await Customer.findAll({
       where: {
         id: req.decodedToken.obj.obj.id
       },
@@ -150,7 +150,7 @@ const FindBysubscriptionsBYApiKey= async (req, res) => {
   // const { userId} = req.query; // Extract frequency from request body
 // console.log(req.decodedToken.obj.obj.id);
   try {
-    const subscriptions = await Customer.findOne({
+    const subscriptions = await Customer.findAll({
       where: {
         api_key: req.userApiKey
       },
