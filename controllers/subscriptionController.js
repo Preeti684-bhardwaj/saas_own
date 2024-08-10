@@ -117,7 +117,7 @@ const FindBysubscriptions = async (req, res) => {
   // const { userId} = req.query; // Extract frequency from request body
 // console.log(req.decodedToken.obj.obj.id);
   try {
-    const subscriptions = await Customer.findAll({
+    const subscriptions = await Customer.findOne({
       where: {
         id: req.decodedToken.obj.obj.id
       },
@@ -150,7 +150,7 @@ const FindBysubscriptionsBYApiKey= async (req, res) => {
   // const { userId} = req.query; // Extract frequency from request body
 // console.log(req.decodedToken.obj.obj.id);
   try {
-    const subscriptions = await Customer.findAll({
+    const subscriptions = await Customer.findOne({
       where: {
         api_key: req.userApiKey
       },
