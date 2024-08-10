@@ -23,7 +23,7 @@ const authenticate = function (req, res, next) {
 
     let decodedToken = jwt.verify(token, JWT_SECRET);
     req.decodedToken = decodedToken;
-   return console.log("Decoded Token ID:", req.decodedToken.obj);
+    console.log("Decoded Token ID:", req.decodedToken.obj.obj.id);
     next();
   } catch (error) {
     if (error.message === "Invalid token") {
