@@ -12,9 +12,9 @@ const authenticate = function (req, res, next) {
     let token = req.cookies.access_token;
 
     // Check if token is in Authorization header if not in cookies
-    if (!token && req.headers.authorization) {
-      token = req.headers.authorization.split(" ")[1];
-    }
+    // if (!token && req.headers.authorization) {
+    //   token = req.headers.authorization.split(" ")[1];
+    // }
 
     console.log("Token:", token);
     if (!token) {
@@ -23,7 +23,7 @@ const authenticate = function (req, res, next) {
 
     let decodedToken = jwt.verify(token, JWT_SECRET);
     req.decodedToken = decodedToken;
-    console.log("Decoded Token ID:", req.decodedToken.obj.obj.id);
+   return console.log("Decoded Token ID:", req.decodedToken);
     next();
   } catch (error) {
     if (error.message === "Invalid token") {
