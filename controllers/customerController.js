@@ -48,6 +48,9 @@ const generateApiKey = () => {
 const customerSignup = asyncHandler(async (req, res, next) => {
   try {
     const { name, email, password, phone } = req.body;
+    if(!name){
+      return next(new ErrorHandler("name is missing", 400));
+    }
     if (!email) {
       return next(new ErrorHandler("email is missing", 400));
     }
@@ -74,12 +77,11 @@ const customerSignup = asyncHandler(async (req, res, next) => {
       });
     }
 
-    if (!isValidLength(name)) {
-      return res.status(400).send({
-        message:
-          "Name should be greater than 3 characters and less than 40 characters and should not start with number",
-      });
-    }
+  // Validate name
+  const nameError = isValidLength(name);
+  if (nameError) {
+    return res.status(400).send({ success: false, message: nameError });
+  }
     // Convert the email to lowercase for case-insensitive comparison
     const lowercaseEmail = email.toLowerCase();
 
@@ -383,7 +385,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     await customer.save({ validate: false });
 
-    const resetUrl = `https://aiengage-samadsrahmans-projects.vercel.app/SignIn/resetPassword/${resetToken}`;
+    const resetUrl = `https://new-video-editor.vercel.app/SignIn/resetPassword/${resetToken}`;
 
     const message = `You requested a password reset. Please click the link below to reset your password:\n\n${resetUrl}`;
 

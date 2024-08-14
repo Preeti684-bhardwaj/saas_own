@@ -126,27 +126,27 @@ const getStatus = asyncHandler(async (req, res, next) => {
 });
 
 // get session detail
-const getSessionDetails = asyncHandler(async (req, res, next) => {
-  try {
-    const session_id = req.query.session_id;
+// const getSessionDetails = asyncHandler(async (req, res, next) => {
+//   try {
+//     const session_id = req.query.session_id;
 
-    if (!session_id) {
-      return next(new errorHandler("Session ID is required", 400));
-    }
+//     if (!session_id) {
+//       return next(new errorHandler("Session ID is required", 400));
+//     }
 
-    const session = await stripe.checkout.sessions.retrieve(session_id);
+//     const session = await stripe.checkout.sessions.retrieve(session_id);
 
-    if (!session) {
-      return next(new errorHandler("Session not found", 404));
-    }
+//     if (!session) {
+//       return next(new errorHandler("Session not found", 404));
+//     }
 
-    console.log(session.metadata);
-    res.send(session);
-  } catch (error) {
-    console.error("Error fetching session details:", error);
-    return next(new errorHandler("Error fetching session details", 500));
-  }
-});
+//     console.log(session.metadata);
+//     res.send(session);
+//   } catch (error) {
+//     console.error("Error fetching session details:", error);
+//     return next(new errorHandler("Error fetching session details", 500));
+//   }
+// });
 
 module.exports = {
   cashfreePayment,
