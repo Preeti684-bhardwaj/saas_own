@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const {
   isValidEmail,
-  isValidPhone,
+  // isValidPhone,
   isValidPassword,
   isValidLength,
 } = require("../utils/validation.js");
@@ -66,9 +66,9 @@ const customerSignup = asyncHandler(async (req, res, next) => {
       return res.status(400).send({ message: "Invalid email" });
     }
 
-    if (!isValidPhone(phone)) {
-      return res.status(400).send({ message: "Invalid Phone Number" });
-    }
+    // if (!isValidPhone(phone)) {
+    //   return res.status(400).send({ message: "Invalid Phone Number" });
+    // }
 
     if (!isValidPassword(password)) {
       return res.status(400).send({
