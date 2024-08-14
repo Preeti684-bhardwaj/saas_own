@@ -385,7 +385,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     await customer.save({ validate: false });
 
-    const resetUrl = `https://new-video-editor.vercel.app/SignIn/resetPassword/${resetToken}`;
+    const resetUrl = `aiengage.xircular.io/SignIn/resetPassword/${resetToken}`;
 
     const message = `You requested a password reset. Please click the link below to reset your password:\n\n${resetUrl}`;
 
