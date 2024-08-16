@@ -1,7 +1,7 @@
 const moment = require("moment");
 const validator = require("validator");
-const PASSWORD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+// const PASSWORD_REGEX =
+//   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 // Get today's date
 const today = moment();
@@ -110,7 +110,34 @@ const isValidEmail = (email) => validator.isEmail(email);
 
 const isValidPhone = (phone) => validator.isMobilePhone(phone, "en-IN");
 
-const isValidPassword = (password) => PASSWORD_REGEX.test(password);
+const isValidPassword = (password) => {
+  if (password.length < 8 || password.length >25) {
+    return "Password should be between 8 to 25 characters long";
+  }
+
+  if (!/(?=.*[a-z])/.test(password)) {
+    return "Password must contain at least one lowercase letter";
+  }
+
+  if (!/(?=.*[A-Z])/.test(password)) {
+    return "Password must contain at least one uppercase letter";
+  }
+
+  if (!/(?=.*\d)/.test(password)) {
+    return "Password must contain at least one number";
+  }
+
+  if (!/(?=.*[@$!%*?&.,:;<>^()[\]{}+_=|/~`#\\-])/.test(password)) {
+    return "Password must contain at least one special character";
+  }
+
+  if (/\s/.test(password)) {
+    return "Password must not contain any spaces";
+  }
+
+  // If all checks pass, the password is valid
+  return null;
+};
 
 const isValidLength = (name) => {
   // const nameRegex = /^(?=.{4,40}$)[A-Za-z](?:\s?[A-Za-z]+)*[A-Za-z]$/;

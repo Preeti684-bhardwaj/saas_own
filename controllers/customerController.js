@@ -47,9 +47,12 @@ const generateApiKey = () => {
 // -----------------CUSTOMER SIGNUP-----------------------------------------------------
 const customerSignup = asyncHandler(async (req, res, next) => {
   try {
-    const { name, email, password, phone } = req.body;
-    if(!name){
+    const { name, phone, email, password } = req.body;
+    if (!name) {
       return next(new ErrorHandler("name is missing", 400));
+    }
+    if (!phone) {
+      return next(new ErrorHandler("phone is missing", 400));
     }
     if (!email) {
       return next(new ErrorHandler("email is missing", 400));
@@ -58,9 +61,17 @@ const customerSignup = asyncHandler(async (req, res, next) => {
     if (!password) {
       return next(new ErrorHandler("password is missing", 400));
     }
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+    // Validate input fields
+    if ([name, phone, email, password].some((field) => field?.trim() === "")) {
+      return res.status(400).send({
+        success: false,
+        message: "Please provide all necessary fields",
+      });
+    }
+    // Validate name
+    const nameError = isValidLength(name);
+    if (nameError) {
+      return res.status(400).send({ success: false, message: nameError });
     }
     if (!isValidEmail(email)) {
       return res.status(400).send({ message: "Invalid email" });
@@ -69,19 +80,6 @@ const customerSignup = asyncHandler(async (req, res, next) => {
     // if (!isValidPhone(phone)) {
     //   return res.status(400).send({ message: "Invalid Phone Number" });
     // }
-
-    if (!isValidPassword(password)) {
-      return res.status(400).send({
-        message:
-          "Password must contain at least 8 characters, including uppercase, lowercase, number and special character",
-      });
-    }
-
-  // Validate name
-  const nameError = isValidLength(name);
-  if (nameError) {
-    return res.status(400).send({ success: false, message: nameError });
-  }
     // Convert the email to lowercase for case-insensitive comparison
     const lowercaseEmail = email.toLowerCase();
 
@@ -99,14 +97,20 @@ const customerSignup = asyncHandler(async (req, res, next) => {
       ) {
         return res
           .status(400)
-          .send({ message: "Both email and phone number are already in use" });
+          .send({ message: "Account already exists" });
       } else if (existingUser.email.toLowerCase() === email.toLowerCase()) {
         return res.status(400).send({ message: "Email already in use" });
       } else {
         return res.status(400).send({ message: "Phone number already in use" });
       }
     }
-
+    const passwordValidationResult = isValidPassword(password);
+    if (passwordValidationResult) {
+      return res.status(400).send({
+        success: false,
+        message: passwordValidationResult,
+      });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const emailToken = generateToken({ email: lowercaseEmail }); // Using lowercase email for token
 
@@ -196,17 +200,30 @@ const sendOtp = asyncHandler(async (req, res, next) => {
     const otp = generateOtp();
     customer.otp = otp;
     customer.otpExpire = Date.now() + 15 * 60 * 1000;
-
+  
     await customer.save({ validate: false });
-
-    const message = `Your One Time Password (OTP) is ${otp}`;
+  
+    // Create HTML content for the email
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <img src="https://stream.xircular.io/AIENGAGE-2.7ccca326820d82f2ab8725ae10f5b44b.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
+        <h2>One-Time Password (OTP) for Verification</h2>
+        <p>Hello,</p>
+        <p>Your One Time Password (OTP) for AI Engage is:</p>
+        <h1 style="font-size: 32px; background-color: #f0f0f0; padding: 10px; display: inline-block;">${otp}</h1>
+        <p>This OTP is valid for 15 minutes.</p>
+        <p>If you didn't request this OTP, please ignore this email.</p>
+        <p>Best regards,<br>AI Engage Team</p>
+      </div>
+    `;
+  
     try {
       await sendEmail({
         email: customer.email,
-        subject: `One-Time Password (OTP) for Verification`,
-        message,
+        subject: `AI Engage: Your One-Time Password (OTP) for Verification`,
+        html: htmlContent,
       });
-
+  
       res.status(200).json({
         success: true,
         message: `OTP sent to ${customer.email} successfully`,
@@ -322,18 +339,18 @@ const customerSignin = asyncHandler(async (req, res, next) => {
       // Update the customer record with the new API key
       await customer.update({ api_key: apiKey });
     }
-    const options={
-      expires:new Date(Date.now()+15*24*60*60*1000),
-      httpOnly:false,
-      secure:true,
-      sameSite:"none",
-      path:'/'
-    }
+    const options = {
+      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      httpOnly: false,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    };
     //  generate token
     const token = generateToken(obj);
-    res.status(200).cookie("access_token", token,options).send({
-      success:true,
-      message:"login successfully",
+    res.status(200).cookie("access_token", token, options).send({
+      success: true,
+      message: "login successfully",
       id: customer.id,
       email: customer.email,
       token: token,
@@ -385,14 +402,26 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     await customer.save({ validate: false });
 
-    const resetUrl = `aiengage.xircular.io/SignIn/resetPassword/${resetToken}`;
+    const resetUrl = `https://aiengage.xircular.io/SignIn/resetPassword/${resetToken}`;
 
-    const message = `You requested a password reset. Please click the link below to reset your password:\n\n${resetUrl}`;
+    // Create HTML content for the email
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <img src="https://stream.xircular.io/AIENGAGE-2.7ccca326820d82f2ab8725ae10f5b44b.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
+        <h2>Password Reset Request</h2>
+        <p>Hello,</p>
+        <p>You have requested a password reset for your AI Engage account. Please click the button below to reset your password:</p>
+        <a href="${resetUrl}" style="display: inline-block; background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; margin-bottom: 15px;">Reset Password</a>
+        <p>If you didn't request this password reset, please ignore this email or contact our support team if you have concerns.</p>
+        <p>This link will expire in 15 minutes for security reasons.</p>
+        <p>Best regards,<br>AI Engage Team</p>
+      </div>
+    `;
 
     await sendEmail({
       email: customer.email,
-      subject: `Password Reset`,
-      message,
+      subject: `AI Engage: Password Reset Request`,
+      html: htmlContent,
     });
 
     res.status(200).json({
@@ -418,13 +447,24 @@ const resetPassword = asyncHandler(async (req, res) => {
   if (!password || !token) {
     return res
       .status(400)
-      .send({ message: "Missing required fields: password or token" });
+      .send({ message: "Missing required fields: password" });
   }
-
+// Validate input fields
+if ([password].some((field) => field?.trim() === "")) {
+  return res.status(400).send({
+    success: false,
+    message: "Please provide necessary field",
+  });
+}
+const passwordValidationResult = isValidPassword(password);
+    if (passwordValidationResult) {
+      return res.status(400).send({
+        success: false,
+        message: passwordValidationResult,
+      });
+    }
   const hashedPassword = await bcrypt.hash(password, 10);
-
-  try {
-    // Find the customer by reset token
+  try{
     const customer = await Customer.findOne({
       where: {
         resetToken: token,
@@ -525,14 +565,14 @@ const freeTrial = asyncHandler(async (req, res, next) => {
     res.status(500).send("Internal server error");
   }
 });
-const logOut=asyncHandler(async(req,res,next)=>{
+const logOut = asyncHandler(async (req, res, next) => {
   res.clearCookie("access_token", {
     sameSite: "None",
     secure: true,
-    path: '/',
+    path: "/",
   });
   res.sendStatus(200);
-})
+});
 
 module.exports = {
   customerSignup,
@@ -543,5 +583,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   freeTrial,
-  logOut
+  logOut,
 };

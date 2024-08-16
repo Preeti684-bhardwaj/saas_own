@@ -3,7 +3,7 @@ const router = express.Router();
 const { customerSignup,getUserById,logOut,customerSignin,forgotPassword,resetPassword , freeTrial, sendOtp, emailOtpVerification } = require("../controllers/customerController");
 const {
 //   validateCreateCustomer,
-  validateSignup,
+  // validateSignup,
   validateSignin,
 //   validateVerifyEmail,
 //   validateUpdateCustomer,
@@ -13,7 +13,7 @@ const {
 } = require("../utils/validation");
 const {authenticate,authorize}=require('../middlewares/auth');
 
-router.post("/signup", validateSignup, customerSignup);
+router.post("/signup",  customerSignup);
 router.post("/signin", validateSignin, customerSignin);
 router.post("/sendOtp",sendOtp)
 router.get("/getUser/:userId",getUserById)
