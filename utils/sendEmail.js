@@ -14,7 +14,8 @@ const sendEmail = async (options) => {
       pass: process.env.SMPT_PASSWORD,
     },
     tls:{
-        rejectUnauthorized: true
+      rejectUnauthorized: false, // Try this if your certificate is self-signed or not properly configured
+      minVersion: 'TLSv1.2', // Ensure you're using at least TLS 1.2
     }
   });
 
