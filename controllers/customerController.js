@@ -200,30 +200,17 @@ const sendOtp = asyncHandler(async (req, res, next) => {
     const otp = generateOtp();
     customer.otp = otp;
     customer.otpExpire = Date.now() + 15 * 60 * 1000;
-  
+
     await customer.save({ validate: false });
-  
-    // Create HTML content for the email
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
-        <h2>One-Time Password (OTP) for Verification</h2>
-        <p>Hello,</p>
-        <p>Your One Time Password (OTP) for AI Engage is:</p>
-        <h1 style="font-size: 32px; background-color: #f0f0f0; padding: 10px; display: inline-block;">${otp}</h1>
-        <p>This OTP is valid for 15 minutes.</p>
-        <p>If you didn't request this OTP, please ignore this email.</p>
-        <p>Best regards,<br>AI Engage Team</p>
-      </div>
-    `;
-  
+
+    const message = `Your One Time Password (OTP) is ${otp}`;
     try {
       await sendEmail({
         email: customer.email,
-        subject: `AI Engage: Your One-Time Password (OTP) for Verification`,
-        html: htmlContent,
+        subject: `One-Time Password (OTP) for Verification`,
+        message,
       });
-  
+
       res.status(200).json({
         success: true,
         message: `OTP sent to ${customer.email} successfully`,
@@ -402,26 +389,14 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     await customer.save({ validate: false });
 
-    const resetUrl = `https://aiengage.xircular.io/SignIn/resetPassword/${resetToken}`;
+    const resetUrl = `aiengage.xircular.io/SignIn/resetPassword/${resetToken}`;
 
-    // Create HTML content for the email
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
-        <h2>Password Reset Request</h2>
-        <p>Hello,</p>
-        <p>You have requested a password reset for your AI Engage account. Please click the button below to reset your password:</p>
-        <a href="${resetUrl}" style="display: inline-block; background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; margin-bottom: 15px;">Reset Password</a>
-        <p>If you didn't request this password reset, please ignore this email or contact our support team if you have concerns.</p>
-        <p>This link will expire in 15 minutes for security reasons.</p>
-        <p>Best regards,<br>AI Engage Team</p>
-      </div>
-    `;
+    const message = `You requested a password reset. Please click the link below to reset your password:\n\n${resetUrl}`;
 
     await sendEmail({
       email: customer.email,
-      subject: `AI Engage: Password Reset Request`,
-      html: htmlContent,
+      subject: `Password Reset`,
+      message,
     });
 
     res.status(200).json({
@@ -447,7 +422,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   if (!password || !token) {
     return res
       .status(400)
-      .send({ message: "Missing required fields: password" });
+      .send({ message: "Missing required fields: password or token" });
   }
 // Validate input fields
 if ([password].some((field) => field?.trim() === "")) {
@@ -457,14 +432,16 @@ if ([password].some((field) => field?.trim() === "")) {
   });
 }
 const passwordValidationResult = isValidPassword(password);
-    if (passwordValidationResult) {
-      return res.status(400).send({
-        success: false,
-        message: passwordValidationResult,
-      });
-    }
+if (passwordValidationResult) {
+  return res.status(400).send({
+    success: false,
+    message: passwordValidationResult,
+  });
+}
   const hashedPassword = await bcrypt.hash(password, 10);
-  try{
+
+  try {
+    // Find the customer by reset token
     const customer = await Customer.findOne({
       where: {
         resetToken: token,
