@@ -18,7 +18,12 @@ const sendEmail = async (options) => {
       minVersion: 'TLSv1.2', // Ensure you're using at least TLS 1.2
     }
   });
-
+//   const mailOptions = {
+//   from: process.env.SMPT_MAIL,
+//   to: options.email,
+//   subject: options.subject,
+//   text: options.message,
+// // };
   const mailOptions = {
     from: process.env.SMPT_MAIL,
     to: options.email,

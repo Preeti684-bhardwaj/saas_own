@@ -206,7 +206,7 @@ const sendOtp = asyncHandler(async (req, res, next) => {
     // Create HTML content for the email
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <img src="https://stream.xircular.io/AIENGAGE-2.7ccca326820d82f2ab8725ae10f5b44b.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
+        <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
         <h2>One-Time Password (OTP) for Verification</h2>
         <p>Hello,</p>
         <p>Your One Time Password (OTP) for AI Engage is:</p>
@@ -407,7 +407,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     // Create HTML content for the email
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <img src="https://stream.xircular.io/AIENGAGE-2.7ccca326820d82f2ab8725ae10f5b44b.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
+        <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
         <h2>Password Reset Request</h2>
         <p>Hello,</p>
         <p>You have requested a password reset for your AI Engage account. Please click the button below to reset your password:</p>
