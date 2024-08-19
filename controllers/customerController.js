@@ -95,9 +95,7 @@ const customerSignup = asyncHandler(async (req, res, next) => {
         existingUser.email.toLowerCase() === email.toLowerCase() &&
         existingUser.phone === phone
       ) {
-        return res
-          .status(400)
-          .send({ message: "Account already exists" });
+        return res.status(400).send({ message: "Account already exists" });
       } else if (existingUser.email.toLowerCase() === email.toLowerCase()) {
         return res.status(400).send({ message: "Email already in use" });
       } else {
@@ -203,12 +201,25 @@ const sendOtp = asyncHandler(async (req, res, next) => {
 
     await customer.save({ validate: false });
 
-    const message = `Your One Time Password (OTP) is ${otp}`;
+    // Create HTML content for the email
+    const htmlContent = `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
+    <h2>One-Time Password (OTP) for Verification</h2>
+    <p>Hello,</p>
+    <p>Your One Time Password (OTP) for AI Engage is:</p>
+    <h1 style="font-size: 32px; background-color: #f0f0f0; padding: 10px; display: inline-block;">${otp}</h1>
+    <p>This OTP is valid for 15 minutes.</p>
+    <p>If you didn't request this OTP, please ignore this email.</p>
+    <p>Best regards,<br>AI Engage Team</p>
+  </div>
+`;
+
     try {
       await sendEmail({
         email: customer.email,
-        subject: `One-Time Password (OTP) for Verification`,
-        message,
+        subject: `AI Engage: Your One-Time Password (OTP) for Verification`,
+        html: htmlContent,
       });
 
       res.status(200).json({
@@ -391,18 +402,30 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     const resetUrl = `aiengage.xircular.io/SignIn/resetPassword/${resetToken}`;
 
-    const message = `You requested a password reset. Please click the link below to reset your password:\n\n${resetUrl}`;
+   // Create HTML content for the email
+   const htmlContent = `
+   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+     <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
+     <h2>Password Reset Request</h2>
+     <p>Hello,</p>
+     <p>You have requested a password reset for your AI Engage account. Please click the button below to reset your password:</p>
+     <a href="${resetUrl}" style="display: inline-block; background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; margin-bottom: 15px;">Reset Password</a>
+     <p>If you didn't request this password reset, please ignore this email or contact our support team if you have concerns.</p>
+     <p>This link will expire in 15 minutes for security reasons.</p>
+     <p>Best regards,<br>AI Engage Team</p>
+   </div>
+ `;
 
-    await sendEmail({
-      email: customer.email,
-      subject: `Password Reset`,
-      message,
-    });
+ await sendEmail({
+   email: customer.email,
+   subject: `AI Engage: Password Reset Request`,
+   html: htmlContent,
+ });
 
-    res.status(200).json({
-      success: true,
-      message: `Password reset link sent to ${customer.email}`,
-    });
+ res.status(200).json({
+   success: true,
+   message: `Password reset link sent to ${customer.email}`,
+ });
   } catch (error) {
     if (customer) {
       customer.resetToken = null;
@@ -424,20 +447,20 @@ const resetPassword = asyncHandler(async (req, res) => {
       .status(400)
       .send({ message: "Missing required fields: password or token" });
   }
-// Validate input fields
-if ([password].some((field) => field?.trim() === "")) {
-  return res.status(400).send({
-    success: false,
-    message: "Please provide necessary field",
-  });
-}
-const passwordValidationResult = isValidPassword(password);
-if (passwordValidationResult) {
-  return res.status(400).send({
-    success: false,
-    message: passwordValidationResult,
-  });
-}
+  // Validate input fields
+  if ([password].some((field) => field?.trim() === "")) {
+    return res.status(400).send({
+      success: false,
+      message: "Please provide necessary field",
+    });
+  }
+  const passwordValidationResult = isValidPassword(password);
+  if (passwordValidationResult) {
+    return res.status(400).send({
+      success: false,
+      message: passwordValidationResult,
+    });
+  }
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
