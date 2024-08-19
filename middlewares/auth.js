@@ -12,9 +12,9 @@ const authenticate = function (req, res, next) {
     let token = req.cookies.access_token;
 
     // Check if token is in Authorization header if not in cookies
-    // if (!token && req.headers.authorization) {
-    //   token = req.headers.authorization.split(" ")[1];
-    // }
+    if (!token && req.headers.authorization) {
+      token = req.headers.authorization.split(" ")[1];
+    }
 
     console.log("Token:", token);
     if (!token) {
