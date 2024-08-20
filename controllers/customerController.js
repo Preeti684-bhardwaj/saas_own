@@ -575,9 +575,9 @@ const logOut = asyncHandler(async (req, res, next) => {
 });
 
 const deleteUser = asyncHandler(async(req,res,next)=>{
-  const { phone } = req.query;
+  const { phone } = req.body;
   try {
-    const user = await Customer.findOne({ where: { phone } });
+    const user = await Customer.findOne({ where: { phone:phone } });
     console.log(user);
     if (!user) {
       return res.status(400).json({
