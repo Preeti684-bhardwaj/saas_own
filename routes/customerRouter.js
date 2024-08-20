@@ -22,10 +22,10 @@ router.post("/forgotpassword",forgotPassword);
 router.post("/resetpassword/:token",resetPassword);
 router.post('/logout',logOut)
 router.get('/startTrial',authenticate,authorize(['CUSTOMER']),freeTrial);
-// router.get("/verifyemail", validateVerifyEmail, customers.verifyEmail);
 router.get("/getUser", getUser);
+router.delete("/deleteuser",deleteUser);// authenticate,authorize(['ADMIN'])
+// router.get("/verifyemail", validateVerifyEmail, customers.verifyEmail);
 // router.put("/:id", validateUpdateCustomer, customers.update);
-router.delete("/deleteuser", deleteUser);
 // router.get("/", validatePagination, customers.findAllPaginated);
 
 module.exports = router;
