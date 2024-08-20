@@ -574,6 +574,40 @@ const logOut = asyncHandler(async (req, res, next) => {
   res.sendStatus(200);
 });
 
+const deleteUser = asyncHandler(async(req,res,next)=>{
+  const { phone } = req.query;
+  try {
+    const user = await Customer.findOne({ where: { phone } });
+    console.log(user);
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found or invalid details.",
+      });
+    }
+    await user.destroy();
+    res.status(200).send({
+      success: true,
+      message: `user with phone ${user.phone} deleted successfully`,
+    });
+  } catch (err) {
+    return next(new ErrorHandler(err.message, 500));
+  }
+})
+const getUser = asyncHandler(async (req, res, next) => {
+  try {
+    const item = await Customer.findAll({
+      attributes: { exclude: ["password"] },
+    });
+    if (!item) {
+      res.status(404).json({ success: false, error: "User not found" });
+    } else {
+      res.json({ success: true, data: item });
+    }
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+});
 module.exports = {
   customerSignup,
   sendOtp,
@@ -584,4 +618,6 @@ module.exports = {
   resetPassword,
   freeTrial,
   logOut,
+  deleteUser,
+  getUser
 };
