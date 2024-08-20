@@ -400,32 +400,51 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     await customer.save({ validate: false });
 
-    const resetUrl = `aiengage.xircular.io/SignIn/resetPassword/${resetToken}`;
+    const resetUrl = `https://aiengage.xircular.io/SignIn/resetPassword/${resetToken}`;
 
-   // Create HTML content for the email
-   const htmlContent = `
-   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-     <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
-     <h2>Password Reset Request</h2>
-     <p>Hello,</p>
-     <p>You have requested a password reset for your AI Engage account. Please click the button below to reset your password:</p>
-     <a href="${resetUrl}">Reset Password</a>
-     <p>If you didn't request this password reset, please ignore this email or contact our support team if you have concerns.</p>
-     <p>This link will expire in 15 minutes for security reasons.</p>
-     <p>Best regards,<br>AI Engage Team</p>
-   </div>
- `;
+    // Create HTML content for the email
+    const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
+      <h2>Password Reset Request</h2>
+      <p>Hello,</p>
+      <p>You have requested a password reset for your AI Engage account. Please click the button below to reset your password:</p>
+      <a href="${resetUrl}" style="display: inline-block; background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; margin-bottom: 15px;">Reset Password</a>
+      <p>If the button above doesn't work, you can also click on this link or copy and paste it into your browser:</p>
+      <p><a href="${resetUrl}">${resetUrl}</a></p>
+      <p>If you didn't request this password reset, please ignore this email or contact our support team if you have concerns.</p>
+      <p>This link will expire in 15 minutes for security reasons.</p>
+      <p>Best regards,<br>AI Engage Team</p>
+    </div>
+    `;
 
- await sendEmail({
-   email: customer.email,
-   subject: `AI Engage: Password Reset Request`,
-   html: htmlContent,
- });
+    // Create plain text content as a fallback
+    const textContent = `
+    Hello,
 
- res.status(200).json({
-   success: true,
-   message: `Password reset link sent to ${customer.email}`,
- });
+    You have requested a password reset for your AI Engage account. Please copy and paste the following link into your browser to reset your password:
+
+    ${resetUrl}
+
+    If you didn't request this password reset, please ignore this email or contact our support team if you have concerns.
+
+    This link will expire in 15 minutes for security reasons.
+
+    Best regards,
+    AI Engage Team
+    `;
+
+    await sendEmail({
+      email: customer.email,
+      subject: `AI Engage: Password Reset Request`,
+      html: htmlContent,
+      text: textContent,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Password reset link sent to ${customer.email}`,
+    });
   } catch (error) {
     if (customer) {
       customer.resetToken = null;
