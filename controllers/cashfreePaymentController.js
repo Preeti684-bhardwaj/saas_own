@@ -8,19 +8,19 @@ const { XClientId, XClientSecret, API_Version, API_URL } = process.env;
 const cashfreePayment = asyncHandler(async (req, res, next) => {
   try {
     const {
-      name,
       orderId,
       userName,
       phone,
+      name,
       userId,
       planPrice
     } = req.body;
 
     if (
-      !name ||
       !orderId ||
       !userName ||
       !phone ||
+      !name ||
       !userId ||
       !planPrice
     ) {
