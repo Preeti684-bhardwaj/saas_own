@@ -410,8 +410,6 @@ const forgotPassword = asyncHandler(async (req, res) => {
       <p>Hello,</p>
       <p>You have requested a password reset for your AI Engage account. Please click the button below to reset your password:</p>
       <a href="${resetUrl}" style="display: inline-block; background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; margin-bottom: 15px;">Reset Password</a>
-      <p>If the button above doesn't work, you can also click on this link or copy and paste it into your browser:</p>
-      <p><a href="${resetUrl}">${resetUrl}</a></p>
       <p>If you didn't request this password reset, please ignore this email or contact our support team if you have concerns.</p>
       <p>This link will expire in 15 minutes for security reasons.</p>
       <p>Best regards,<br>AI Engage Team</p>
