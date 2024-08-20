@@ -111,30 +111,30 @@ const isValidEmail = (email) => validator.isEmail(email);
 const isValidPhone = (phone) => validator.isMobilePhone(phone, "en-IN");
 
 const isValidPassword = (password) => {
-  if (password.length < 8 || password.length >25) {
+  if (password.length < 8 || password.length > 25) {
     return "Password should be between 8 to 25 characters long";
   }
-
+  
   if (!/(?=.*[a-z])/.test(password)) {
-    return "Password must contain at least one lowercase letter";
+    return "Password should contain at least a uppercase letter, lower case letter, number and special character";
   }
-
+  
   if (!/(?=.*[A-Z])/.test(password)) {
-    return "Password must contain at least one uppercase letter";
+    return "Password should contain at least a uppercase letter, lower case letter, number and special character";
   }
-
+  
   if (!/(?=.*\d)/.test(password)) {
-    return "Password must contain at least one number";
+    return "Password should contain at least a uppercase letter, lower case letter, number and special character";
   }
-
+  
   if (!/(?=.*[@$!%*?&.,:;<>^()[\]{}+_=|/~`#\\-])/.test(password)) {
-    return "Password must contain at least one special character";
+    return "Password should contain at least a uppercase letter, lower case letter, number and special character";
   }
-
-  if (/\s/.test(password)) {
-    return "Password must not contain any spaces";
+  
+  if (/^\s|\s$/.test(password)) {
+    return "Your password can't start or end with a blank space";
   }
-
+  
   // If all checks pass, the password is valid
   return null;
 };
@@ -144,23 +144,26 @@ const isValidLength = (name) => {
   if (!name) {
     return "Name is required";
   }
+  // Trim leading and trailing spaces and reduce multiple spaces to single space
+  name = name.trim().replace(/\s+/g, ' ');
+
   if (/^\s|\s$/.test(name)) {
-    return "Name should not start or end with a space";
+    return "Name should only contain letters and spaces";
   }
   if (name.length < 4 || name.length > 40) {
     return "Name should be between 4 and 40 characters long";
   }
   if (/^[0-9]/.test(name)) {
-    return "Name should not start with a number";
+    return "Name should only contain letters and spaces";
   }
   if (/\d/.test(name)) {
-    return "Name should not contain numbers";
+    return "Name should only contain letters and spaces";
   }
   if (/[^a-zA-Z\s]/.test(name)) {
     return "Name should only contain letters and spaces";
   }
   if (/\s{2,}/.test(name)) {
-    return "Name should not contain consecutive spaces";
+    return "Name should only contain letters and spaces";
   }
   // if (!nameRegex.test(name)) {
   //   return "Name contains invalid characters";

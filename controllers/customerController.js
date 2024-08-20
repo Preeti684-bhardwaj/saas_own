@@ -69,7 +69,7 @@ const customerSignup = asyncHandler(async (req, res, next) => {
       });
     }
     // Validate name
-    const nameError = isValidLength(name);
+    const nameError = isValidLength(name.trim());
     if (nameError) {
       return res.status(400).send({ success: false, message: nameError });
     }
@@ -82,7 +82,7 @@ const customerSignup = asyncHandler(async (req, res, next) => {
     // }
     // Convert the email to lowercase for case-insensitive comparison
     const lowercaseEmail = email.toLowerCase();
-
+     const trimmedName =name.trim()
     // Use a case-insensitive query to check for existing email
     const existingUser = await Customer.findOne({
       where: {
@@ -113,7 +113,7 @@ const customerSignup = asyncHandler(async (req, res, next) => {
     const emailToken = generateToken({ email: lowercaseEmail }); // Using lowercase email for token
 
     const customer = await Customer.create({
-      name,
+      name:trimmedName,
       email: lowercaseEmail, // Store email in lowercase
       password: hashedPassword,
       phone,
@@ -408,8 +408,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
      <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
      <h2>Password Reset Request</h2>
      <p>Hello,</p>
-     <p>You have requested a password reset for your AI Engage account. Please click the button below to reset your password:</p>
-     <a href="${resetUrl}" style="display: inline-block; background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; margin-bottom: 15px;">Reset Password</a>
+     <p>You have requested a password reset for your AI Engage account. Please click the link below to reset your password:</p>
+     <p>${resetUrl}</p>
      <p>If you didn't request this password reset, please ignore this email or contact our support team if you have concerns.</p>
      <p>This link will expire in 15 minutes for security reasons.</p>
      <p>Best regards,<br>AI Engage Team</p>
@@ -445,7 +445,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   if (!password || !token) {
     return res
       .status(400)
-      .send({ message: "Missing required fields: password or token" });
+      .send({ message: "Missing required fields: password" });
   }
   // Validate input fields
   if ([password].some((field) => field?.trim() === "")) {

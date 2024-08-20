@@ -42,7 +42,7 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
         "x-client-secret": XClientSecret,
       },
       data: {
-        order_amount: planPrice * 83.77,
+        order_amount: planPrice ,
         order_currency: "INR",
         order_id: orderId,
         customer_details: {
