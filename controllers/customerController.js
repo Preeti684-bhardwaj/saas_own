@@ -408,8 +408,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
      <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
      <h2>Password Reset Request</h2>
      <p>Hello,</p>
-     <p>You have requested a password reset for your AI Engage account. Please click the link below to reset your password:</p>
-     <p>${resetUrl}</p>
+     <p>You have requested a password reset for your AI Engage account. Please click the button below to reset your password:</p>
+     <a href="${resetUrl}">Reset Password</a>
      <p>If you didn't request this password reset, please ignore this email or contact our support team if you have concerns.</p>
      <p>This link will expire in 15 minutes for security reasons.</p>
      <p>Best regards,<br>AI Engage Team</p>
