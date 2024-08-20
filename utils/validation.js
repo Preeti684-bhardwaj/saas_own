@@ -140,34 +140,29 @@ const isValidPassword = (password) => {
 };
 
 const isValidLength = (name) => {
-  // const nameRegex = /^(?=.{4,40}$)[A-Za-z](?:\s?[A-Za-z]+)*[A-Za-z]$/;
   if (!name) {
     return "Name is required";
   }
+  
   // Trim leading and trailing spaces and reduce multiple spaces to single space
   name = name.trim().replace(/\s+/g, ' ');
 
-  if (/^\s|\s$/.test(name)) {
-    return "Name should only contain letters and spaces";
-  }
   if (name.length < 4 || name.length > 40) {
     return "Name should be between 4 and 40 characters long";
   }
+  
   if (/^[0-9]/.test(name)) {
-    return "Name should only contain letters and spaces";
+    return "Name should not start with a number";
   }
+  
   if (/\d/.test(name)) {
-    return "Name should only contain letters and spaces";
+    return "Name should not contain numbers";
   }
+  
   if (/[^a-zA-Z\s]/.test(name)) {
     return "Name should only contain letters and spaces";
   }
-  if (/\s{2,}/.test(name)) {
-    return "Name should only contain letters and spaces";
-  }
-  // if (!nameRegex.test(name)) {
-  //   return "Name contains invalid characters";
-  // }
+  
   return null;  // No errors
 };
 

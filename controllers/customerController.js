@@ -47,8 +47,9 @@ const generateApiKey = () => {
 // -----------------CUSTOMER SIGNUP-----------------------------------------------------
 const customerSignup = asyncHandler(async (req, res, next) => {
   try {
-    const { name, phone, email, password } = req.body;
-    if (!name) {
+    const { name: rawName, phone, email, password } = req.body;
+    
+    if (!rawName) {
       return next(new ErrorHandler("name is missing", 400));
     }
     if (!phone) {
@@ -57,51 +58,51 @@ const customerSignup = asyncHandler(async (req, res, next) => {
     if (!email) {
       return next(new ErrorHandler("email is missing", 400));
     }
-
     if (!password) {
       return next(new ErrorHandler("password is missing", 400));
     }
+
+    // Sanitize name: trim and reduce multiple spaces to single space
+    const name = rawName.trim().replace(/\s+/g, ' ');
+
     // Validate input fields
-    if ([name, phone, email, password].some((field) => field?.trim() === "")) {
+    if ([name, phone, email, password].some((field) => field === "")) {
       return res.status(400).send({
         success: false,
         message: "Please provide all necessary fields",
       });
     }
+
     // Validate name
-    const nameError = isValidLength(name.trim());
+    const nameError = isValidLength(name);
     if (nameError) {
       return res.status(400).send({ success: false, message: nameError });
     }
+
     if (!isValidEmail(email)) {
       return res.status(400).send({ message: "Invalid email" });
     }
 
-    // if (!isValidPhone(phone)) {
-    //   return res.status(400).send({ message: "Invalid Phone Number" });
-    // }
     // Convert the email to lowercase for case-insensitive comparison
     const lowercaseEmail = email.toLowerCase();
-     const trimmedName =name.trim()
+
     // Use a case-insensitive query to check for existing email
     const existingUser = await Customer.findOne({
       where: {
-        [Op.or]: [{ email: email.toLowerCase() }, { phone }],
+        [Op.or]: [{ email: lowercaseEmail }, { phone }],
       },
     });
 
     if (existingUser) {
-      if (
-        existingUser.email.toLowerCase() === email.toLowerCase() &&
-        existingUser.phone === phone
-      ) {
+      if (existingUser.email.toLowerCase() === lowercaseEmail && existingUser.phone === phone) {
         return res.status(400).send({ message: "Account already exists" });
-      } else if (existingUser.email.toLowerCase() === email.toLowerCase()) {
+      } else if (existingUser.email.toLowerCase() === lowercaseEmail) {
         return res.status(400).send({ message: "Email already in use" });
       } else {
         return res.status(400).send({ message: "Phone number already in use" });
       }
     }
+
     const passwordValidationResult = isValidPassword(password);
     if (passwordValidationResult) {
       return res.status(400).send({
@@ -109,25 +110,22 @@ const customerSignup = asyncHandler(async (req, res, next) => {
         message: passwordValidationResult,
       });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const emailToken = generateToken({ email: lowercaseEmail }); // Using lowercase email for token
+    const emailToken = generateToken({ email: lowercaseEmail });
 
     const customer = await Customer.create({
-      name:trimmedName,
-      email: lowercaseEmail, // Store email in lowercase
+      name,
+      email: lowercaseEmail,
       password: hashedPassword,
       phone,
       emailToken,
-      // Additional fields as necessary
     });
-
-    //sendVerificationEmail(lowercaseEmail, emailToken);
 
     res.status(201).send({
       id: customer.id,
       name: customer.name,
       email: customer.email,
-      // Add additional fields as necessary
     });
   } catch (error) {
     return next(
