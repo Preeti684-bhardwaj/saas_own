@@ -338,15 +338,14 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     const options = {
       expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
       httpOnly: false,
-      // secure: true,
+      secure: true,
       sameSite: "none",
       path: "/",
-      // signed: true
-      // domain: '.xircular.io' 
     };
     //  generate token
     const token = generateToken(obj);
-    res.status(200).cookie("access_token", token, options).send({
+    res.cookie("access_token", token, options)
+    res.status(200).send({
       success: true,
       message: "login successfully",
       id: customer.id,
