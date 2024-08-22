@@ -23,7 +23,6 @@ router.post("/resetpassword/:token",resetPassword);
 router.post('/logout',logOut)
 router.get('/startTrial',authenticate,authorize(['CUSTOMER']),freeTrial);
 router.get("/getUser", getUser);
-router.get("/getUser/:userId",getUserById)
 router.delete("/deleteuser",deleteUser);// authenticate,authorize(['ADMIN'])
 // router.get("/verifyemail", validateVerifyEmail, customers.verifyEmail);
 // router.put("/:id", validateUpdateCustomer, customers.update);
