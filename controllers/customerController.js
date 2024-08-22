@@ -310,7 +310,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     }
     const customer = await Customer.findOne({ where: { email } });
     if (!customer) {
-      return res.status(404).send({status :false,message :"Customer not found."});
+      return res.status(404).json({status :false,message :"Customer not found."});
     }
     //if (!customer.IsActivated) {
     //    return res.status(401).json({ message: "Customer not found" });
@@ -321,7 +321,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
 
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
-      return res.status(400).send({status :false,message : "Invalid password."});
+      return res.status(400).json({status :false,message : "Invalid password."});
     }
 
     const obj = {
@@ -346,7 +346,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     const token = generateToken(obj);
     res.cookie("access_token", token, options)
     console.log("i am from signin",req.cookies)
-    res.status(200).send({
+    res.status(200).json({
       success: true,
       message: "login successfully",
       id: customer.id,
