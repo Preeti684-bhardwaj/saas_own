@@ -310,7 +310,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     }
     const customer = await Customer.findOne({ where: { email } });
     if (!customer) {
-      return next(new ErrorHandler("Customer not found.", 404));
+      return res.status(404).send({status :false,message :"Customer not found."});
     }
     //if (!customer.IsActivated) {
     //    return res.status(401).json({ message: "Customer not found" });
@@ -321,7 +321,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
 
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
-      return next(new ErrorHandler("Invalid password.", 400));
+      return res.status(400).send({status :false,message : "Invalid password."});
     }
 
     const obj = {
