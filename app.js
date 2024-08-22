@@ -9,29 +9,17 @@ app.use(cookieParser());
 const allowedOrigins =['https://aiengage.xircular.io','https://new-video-editor.vercel.app','http://localhost:3000',undefined ]
 
 app.use(cors({
-  origin: (origin, callback) => {
-    console.log("Incoming request origin:", origin);
-    
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log("Origin not allowed:", origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true, // Enable this to allow cookies and authentication headers
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
-}));
+    origin: (origin, callback) => {
+      console.log("origin coming",origin)
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    // credentials: true // Allow cookies to be sent and received
+  }));
 
-// After CORS middleware, add this to log all requests
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  console.log('Request headers:', req.headers);
-  next();
-});
 app.use(express.static("public"));
 app.use(express.json());
 app.use(bodyParser.json());
