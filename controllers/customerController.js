@@ -584,7 +584,12 @@ const freeTrial = asyncHandler(async (req, res, next) => {
 });
 const logOut = asyncHandler(async (req, res) => {
   return res
-    .clearCookie("access_token")
+    .clearCookie("access_token",{
+      httpOnly: false,
+      secure: true,
+      sameSite: "none",
+      path: "/"
+    })
     .status(200)
     .json({ message: "Successfully logged out" });
 });
