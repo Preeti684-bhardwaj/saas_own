@@ -345,6 +345,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     //  generate token
     const token = generateToken(obj);
     res.cookie("access_token", token, options)
+    console.log("i am from signin",req.cookies)
     res.status(200).send({
       success: true,
       message: "login successfully",
