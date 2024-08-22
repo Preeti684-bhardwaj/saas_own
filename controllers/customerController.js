@@ -338,10 +338,10 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     const options = {
       expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
       httpOnly: false,
-      secure: true,
+      // secure: true,
       sameSite: "none",
       path: "/",
-      signed: true
+      // signed: true
       // domain: '.xircular.io' 
     };
     //  generate token
