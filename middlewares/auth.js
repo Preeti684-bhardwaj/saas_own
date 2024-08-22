@@ -8,12 +8,18 @@ const { JWT_SECRET } = process.env;
 const authenticate = function (req, res, next) {
   try {
     console.log("Cookies:", req.cookies);
-    console.log("headers",req.headers);
-    let token = req.cookies.access_token;
+    console.log("headers", req.headers);
+    
+    let token = req.cookies?.access_token;
 
     // Check if token is in Authorization header if not in cookies
     if (!token && req.headers.authorization) {
       token = req.headers.authorization.split(" ")[1];
+    }
+
+    // Check if token is in query parameters
+    if (!token && req.query.token) {
+      token = req.query.token;
     }
 
     console.log("Token:", token);
