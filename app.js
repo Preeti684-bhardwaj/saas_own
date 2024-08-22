@@ -17,7 +17,7 @@ app.use(cors({
         callback(new Error('Not allowed by CORS'));
       }
     },
-    // credentials: true // Allow cookies to be sent and received
+    credentials: true // Allow cookies to be sent and received
   }));
 
 app.use(express.static("public"));
