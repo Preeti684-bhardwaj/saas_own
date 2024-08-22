@@ -341,6 +341,7 @@ const customerSignin = asyncHandler(async (req, res, next) => {
       secure: true,
       sameSite: "none",
       path: "/",
+      signed: true
       // domain: '.xircular.io' 
     };
     //  generate token
