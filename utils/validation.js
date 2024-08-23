@@ -152,11 +152,11 @@ const isValidLength = (name) => {
   }
   
   if (/^[0-9]/.test(name)) {
-    return "Name should not start with a number";
+    return "Name should only contain letters and spaces";
   }
   
   if (/\d/.test(name)) {
-    return "Name should not contain numbers";
+    return "Name should only contain letters and spaces";
   }
   
   if (/[^a-zA-Z\s]/.test(name)) {
