@@ -1,9 +1,11 @@
 const env = require('./dbenv.js');
+const pg = require("pg")
 
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize(env.database, env.username, env.password, {
   host: env.host,
   dialect: env.dialect,
+dialectModule: pg,
   operatorsAliases: false,
 
   pool: {
