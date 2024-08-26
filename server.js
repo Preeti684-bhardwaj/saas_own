@@ -5,7 +5,6 @@ require("dotenv").config({path:"./.env"})
 const passport = require('passport');
 const passportJWT = require('passport-jwt');
 
-
 process.on("uncaughtException" , (err)=>{
     console.log(`Error: ${err.message}`)
     console.log(`Shutting down the server due to uncaught Exception`)
