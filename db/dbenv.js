@@ -1,8 +1,8 @@
 const env = {
-    database: 'saas',
-    username: 'postgres',
-    password: '987654',
-    host: 'localhost',
+    database: 'verceldb',
+    username: 'default',
+    password: '2koNB4jcZbpA',
+    host: 'ep-holy-butterfly-a4jqs854-pooler.us-east-1.aws.neon.tech',
     dialect: 'postgres',
     pool: {
       max: 5,
