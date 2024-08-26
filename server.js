@@ -10,7 +10,6 @@ process.on("uncaughtException" , (err)=>{
     console.log(`Shutting down the server due to uncaught Exception`)
     process.exit(1)
 })
-
 // jwt verification 
 let ExtractJwt = passportJWT.ExtractJwt;
 let JwtStrategy = passportJWT.Strategy;
