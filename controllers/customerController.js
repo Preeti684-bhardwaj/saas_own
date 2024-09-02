@@ -83,7 +83,7 @@ const customerSignup = asyncHandler(async (req, res, next) => {
     // Check for existing customer with the provided email or phone
     const existingUser = await Customer.findOne({
       where: {
-        [Op.or]: [{ email: lowercaseEmail }, { phone }],
+        [Op.or]: [{ email: lowercaseEmail }, { phone:phone }],
       },
     });
 
