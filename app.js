@@ -1,11 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
 const errorMiddleware = require("./middlewares/error.js");
 require("dotenv").config({ path: "./.env" });
 const app = express();
 const cors = require("cors");
-app.use(cookieParser());
+// app.use(cookieParser());
 const allowedOrigins =['https://ai-engage-complete.vercel.app','https://aiengage.xircular.io','https://new-video-editor.vercel.app','http://localhost:3000',undefined ]
 
 app.use(cors({

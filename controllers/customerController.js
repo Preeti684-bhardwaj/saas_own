@@ -48,24 +48,17 @@ const generateApiKey = () => {
 const customerSignup = asyncHandler(async (req, res, next) => {
   try {
     const { name: rawName, phone, email, password } = req.body;
-    
-    if (!rawName) {
-      return next(new ErrorHandler("name is missing", 400));
-    }
-    if (!phone) {
-      return next(new ErrorHandler("phone is missing", 400));
-    }
-    if (!email) {
-      return next(new ErrorHandler("email is missing", 400));
-    }
-    if (!password) {
-      return next(new ErrorHandler("password is missing", 400));
-    }
-
-    // Sanitize name: trim and reduce multiple spaces to single space
-    const name = rawName.trim().replace(/\s+/g, ' ');
 
     // Validate input fields
+    if (!rawName) return next(new ErrorHandler("Name is missing", 400));
+    if (!phone) return next(new ErrorHandler("Phone is missing", 400));
+    if (!email) return next(new ErrorHandler("Email is missing", 400));
+    if (!password) return next(new ErrorHandler("Password is missing", 400));
+
+    // Sanitize name: trim and reduce multiple spaces to a single space
+    const name = rawName.trim().replace(/\s+/g, " ");
+
+    // Validate input fields again to check if they are empty strings
     if ([name, phone, email, password].some((field) => field === "")) {
       return res.status(400).send({
         success: false,
@@ -79,6 +72,7 @@ const customerSignup = asyncHandler(async (req, res, next) => {
       return res.status(400).send({ success: false, message: nameError });
     }
 
+    // Validate email format
     if (!isValidEmail(email)) {
       return res.status(400).send({ message: "Invalid email" });
     }
@@ -86,7 +80,7 @@ const customerSignup = asyncHandler(async (req, res, next) => {
     // Convert the email to lowercase for case-insensitive comparison
     const lowercaseEmail = email.toLowerCase();
 
-    // Use a case-insensitive query to check for existing email
+    // Check for existing customer with the provided email or phone
     const existingUser = await Customer.findOne({
       where: {
         [Op.or]: [{ email: lowercaseEmail }, { phone }],
@@ -94,15 +88,35 @@ const customerSignup = asyncHandler(async (req, res, next) => {
     });
 
     if (existingUser) {
-      if (existingUser.email.toLowerCase() === lowercaseEmail && existingUser.phone === phone) {
-        return res.status(400).send({ message: "Account already exists" });
-      } else if (existingUser.email.toLowerCase() === lowercaseEmail) {
-        return res.status(400).send({ message: "Email already in use" });
+      if (existingUser.isEmailVerified) {
+        // If the user is already verified, block the attempt to create a new account
+        if (
+          existingUser.email.toLowerCase() === lowercaseEmail &&
+          existingUser.phone === phone
+        ) {
+          return res.status(400).send({ message: "Account already exists" });
+        } else if (existingUser.email.toLowerCase() === lowercaseEmail) {
+          return res.status(400).send({ message: "Email already in use" });
+        } else {
+          return res
+            .status(400)
+            .send({ message: "Phone number already in use" });
+        }
       } else {
-        return res.status(400).send({ message: "Phone number already in use" });
+        // Update the existing user's record with the new email and generate a new verification token
+        existingUser.email = lowercaseEmail;
+        existingUser.emailToken = generateToken({ email: lowercaseEmail });
+        await existingUser.save();
+
+        return res.status(200).send({
+          success: true,
+          message: "Email updated successfully. Please verify your new email.",
+          customerId: existingUser.id,
+        });
       }
     }
 
+    // If no existing user found, validate the password and create a new user
     const passwordValidationResult = isValidPassword(password);
     if (passwordValidationResult) {
       return res.status(400).send({
@@ -111,21 +125,20 @@ const customerSignup = asyncHandler(async (req, res, next) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Generate a verification token
     const emailToken = generateToken({ email: lowercaseEmail });
 
+    // Temporarily store minimal data in the Customer table
     const customer = await Customer.create({
-      name,
       email: lowercaseEmail,
-      password: hashedPassword,
-      phone,
       emailToken,
+      isEmailVerified: false, // Set verified status to false
     });
 
     res.status(201).send({
-      id: customer.id,
-      name: customer.name,
-      email: customer.email,
+      success: true,
+      message: "Signup successful. Please verify your email.",
+      customerId: customer.id,
     });
   } catch (error) {
     return next(
@@ -136,40 +149,7 @@ const customerSignup = asyncHandler(async (req, res, next) => {
     );
   }
 });
-// ===========
-//     const existingUser = await Customer.findOne({ where: { email } });
 
-//     if (existingUser) {
-//       return next(new ErrorHandler("Email is already in use.", 400));
-//     }
-
-//     const hashedPassword = await bcrypt.hash(password, 10);
-//     const emailToken = generateToken({ email }); // This should ideally be a different token, specific for email verification
-
-//     const customer = await Customer.create({
-//       email,
-//       password: hashedPassword,
-//       phone,
-//       emailToken,
-//       // Additional fields as necessary
-//     });
-
-//     //sendVerificationEmail(email, emailToken);
-
-//     res.status(201).send({
-//       id: customer.id,
-//       email: customer.email,
-//       // Add additional fields as necessary
-//     });
-//   } catch (error) {
-//     return next(
-//       new ErrorHandler(
-//         error.message || "Some error occurred during signup.",
-//         500
-//       )
-//     );
-//   }
-// });
 // ----------------send otp-----------------------------
 const sendOtp = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
@@ -241,46 +221,52 @@ const sendOtp = asyncHandler(async (req, res, next) => {
 });
 // ==========================email verification------------------------------
 const emailOtpVerification = asyncHandler(async (req, res) => {
-  const { email, otp } = req.body;
+  const { email, otp, name, phone, password } = req.body; // Include additional fields
 
-  // Validate the OTP
-  if (!email) {
-    return next(new ErrorHandler("email is missing", 400));
-  }
-  if (!otp) {
+  // Validate required fields
+  if (!email || !otp) {
     return res
       .status(400)
-      .json({ success: false, message: "OTP is required." });
+      .json({ success: false, message: "Email and OTP are required." });
   }
 
   try {
-    const customer = await Customer.findOne({ where: { email: email } });
-    console.log(customer);
+    const customer = await Customer.findOne({ where: { email: email.trim() } });
+
     if (!customer) {
-      return res.status(400).json({
-        success: false,
-        message: "Customer not found or invalid details.",
-      });
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: "Customer not found or invalid details.",
+        });
     }
 
-    // Check OTP validity
+    // Validate OTP
     if (customer.otp !== otp) {
       return res.status(400).json({ success: false, message: "Invalid OTP" });
     }
+
     if (customer.otpExpire < Date.now()) {
-      return res.status(400).json({ success: false, message: "expired OTP." });
+      return res.status(400).json({ success: false, message: "Expired OTP." });
     }
 
-    // Update agent details
+    // Store the full details after successful email verification
+    const hashedPassword = await bcrypt.hash(password, 10);
+    customer.name = name.trim().replace(/\s+/g, " ");
+    customer.phone = phone;
+    customer.password = hashedPassword;
     customer.isEmailVerified = true;
     customer.otp = null;
     customer.otpExpire = null;
+
+    // Save updated customer details
     await customer.save();
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: "Customer data",
-      agent: {
+      message: "Email verified and customer details saved successfully.",
+      customer: {
         id: customer.id,
         name: customer.name,
         email: customer.email,
@@ -310,7 +296,9 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     }
     const customer = await Customer.findOne({ where: { email } });
     if (!customer) {
-      return res.status(404).json({status :false,message :"Customer not found."});
+      return res
+        .status(404)
+        .json({ status: false, message: "Customer not found." });
     }
     //if (!customer.IsActivated) {
     //    return res.status(401).json({ message: "Customer not found" });
@@ -321,7 +309,9 @@ const customerSignin = asyncHandler(async (req, res, next) => {
 
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
-      return res.status(400).json({status :false,message : "Invalid password."});
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid password." });
     }
 
     const obj = {
@@ -344,8 +334,8 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     };
     //  generate token
     const token = generateToken(obj);
-    res.cookie("access_token", token, options)
-    console.log("i am from signin",req.cookies)
+    res.cookie("access_token", token, options);
+    console.log("i am from signin", req.cookies);
     res.status(200).json({
       success: true,
       message: "login successfully",
@@ -582,22 +572,24 @@ const freeTrial = asyncHandler(async (req, res, next) => {
     res.status(500).send("Internal server error");
   }
 });
-const logOut = asyncHandler(async (req, res) => {
-  return res
-    .clearCookie("access_token",{
-      httpOnly: false,
-      secure: true,
-      sameSite: "none",
-      path: "/"
-    })
-    .status(200)
-    .json({ message: "Successfully logged out" });
-});
 
-const deleteUser = asyncHandler(async(req,res,next)=>{
+// const logOut = asyncHandler(async (req, res) => {
+//   return res
+//     .clearCookie("access_token",{
+//       httpOnly: false,
+//       secure: true,
+//       sameSite: "none",
+//       path: "/"
+//     })
+//     .status(200)
+//     .json({ message: "Successfully logged out" });
+// });
+
+// delete user through phone
+const deleteUser = asyncHandler(async (req, res, next) => {
   const { phone } = req.body;
   try {
-    const user = await Customer.findOne({ where: { phone:phone } });
+    const user = await Customer.findOne({ where: { phone: phone } });
     console.log(user);
     if (!user) {
       return res.status(400).json({
@@ -613,7 +605,9 @@ const deleteUser = asyncHandler(async(req,res,next)=>{
   } catch (err) {
     return next(new ErrorHandler(err.message, 500));
   }
-})
+});
+
+// get All user
 const getUser = asyncHandler(async (req, res, next) => {
   try {
     const item = await Customer.findAll({
@@ -637,7 +631,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   freeTrial,
-  logOut,
+  // logOut,
   deleteUser,
-  getUser
+  getUser,
 };

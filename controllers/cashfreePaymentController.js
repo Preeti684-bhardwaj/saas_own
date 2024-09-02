@@ -113,9 +113,9 @@ const getStatus = asyncHandler(async (req, res, next) => {
     console.log(response.data);
 
     if (response.data.order_status === "PAID") {
-      console.log(req.cookies);
-      let token = req.cookies.access_token;
-      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings?accessToken=${token}`);
+      // console.log(req.cookies);
+      // let token = req.cookies.access_token;
+      return res.status(301).redirect(`https://new-video-editor.vercel.app/listings`); //?accessToken=${token}
     } else if (response.data.order_status === "ACTIVE") {
       return res.status(301).redirect(`https://aiengage.xircular.io/${response.data.payment_session_id}`);
     } else {
