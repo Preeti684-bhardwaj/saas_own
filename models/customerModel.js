@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
         phone: Sequelize.STRING,
         password: {
             type: Sequelize.STRING,
-            allowNull: false
+            // allowNull: false
         },
         trialStartDate: {
             type: Sequelize.DATE,
