@@ -107,12 +107,6 @@ const customerSignup = asyncHandler(async (req, res, next) => {
         existingUser.email = lowercaseEmail;
         existingUser.emailToken = generateToken({ email: lowercaseEmail });
         await existingUser.save();
-
-        return res.status(200).send({
-          success: true,
-          message: "Email updated successfully. Please verify your new email.",
-          customerId: existingUser.id,
-        });
       }
     }
 
