@@ -1,7 +1,7 @@
 const db = require("../db/dbConnection.js");
 const Admin = db.admins;
 const asyncHandler = require("../utils/asyncHandler.js");
-const ErrorHandler = require("../utils/errorHandler.js");
+// const ErrorHandler = require("../utils/errorHandler.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
@@ -15,15 +15,15 @@ const generateToken = (admin) => {
 
 
 // -------------------ADMIN SIGNUP------------------------------------------------------
-const adminSignup = asyncHandler(async (req, res, next) => {
+const adminSignup = asyncHandler(async (req, res) => {
   try {
     const { email, password, phone } = req.body;
     if (!email) {
-      return next(new ErrorHandler("email is missing", 400));
+      return res.status(400).send({status:false,message:"email is missing"});
     }
 
     if (!password) {
-      return next(new ErrorHandler("password is missing", 400));
+      return res.status(400).send({status:false,message:"password is missing"});
     }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -32,7 +32,7 @@ const adminSignup = asyncHandler(async (req, res, next) => {
     const existingAdmin = await Admin.findOne({ where: { email } });
 
     if (existingAdmin) {
-      return next(new ErrorHandler("Email is already in use.", 400));
+      return res.status(400).send({status:false,message:"Email is already in use."});
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -54,25 +54,25 @@ const adminSignup = asyncHandler(async (req, res, next) => {
       // Add additional fields as necessary
     });
   } catch (error) {
-    return next(new ErrorHandler( "Some error occurred during signUp.", error, 500));
+    return es.status(500).send({status:false,message:error.message||"Some error occurred during signUp."});
   }
 });
 
 // --------------------------ADMIN SIGNIN-----------------------------------------------------
-const adminSignin = asyncHandler(async (req, res, next) => {
+const adminSignin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   try {
     if (!email) {
-      return next(new ErrorHandler("email is missing", 400));
+      return res.status(400).send({status:false,message:"email is missing"});
     }
 
     if (!password) {
-      return next(new ErrorHandler("password is missing", 400));
+      return res.status(400).send({status:false,message:"password is missing"});
     }
     const admin = await Admin.findOne({ where: { email } });
     if (!admin) {
-      return next(new ErrorHandler("admin not found.", 404 ));
+      return res.status(404).send({status:false,message:"admin not found."});
     }
     //if (!customer.IsActivated) {
     //    return res.status(401).json({ message: "Customer not found" });
@@ -83,7 +83,7 @@ const adminSignin = asyncHandler(async (req, res, next) => {
 
     const isPasswordValid = await bcrypt.compare(password, admin.password);
     if (!isPasswordValid) {
-        next(new ErrorHandler("Invalid password.", 400 ));
+       returnres.status(400).send({status:false,message:"Invalid password."});
     }
 
     const obj = {
@@ -94,23 +94,24 @@ const adminSignin = asyncHandler(async (req, res, next) => {
     const token = generateToken(obj);
 
     res.status(200).send({
+      status:true,
       id: admin.id,
       email: admin.email,
       token: token,
       // Add additional fields as necessary
     });
   } catch (error) {
-    return next(new ErrorHandler( "Some error occurred during signin.", error, 500));
+    return res.status(500).send({status:false,message:error.message||"Some error occurred during signin."});
   }
 });
 
 // ------------------FORGET PASSWORD-------------------------------------------------------
-const forgotPassword = asyncHandler(async (req, res, next) => {
+const forgotPassword = asyncHandler(async (req, res) => {
   try {
     const { email } = req.body;
 
     if (!email) {
-      return next(new ErrorHandler("email is missing", 400));
+      return res.status(400).send({status:false,message:"email is missing"});
     }
 
     const adminInfo = await Admin.findOne({
@@ -120,7 +121,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
     });
 
     if (!adminInfo) {
-      return next(new ErrorHandler("admin not found", 404));
+      return res.status(404).send({status:false,message:"admin not found"});
     }
     return res.status(200).send({
       success: true,
@@ -128,24 +129,24 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
       adminID: adminInfo.id,
     });
   } catch (error) {
-    return next(new ErrorHandler("An error occurred", error, 500));
+    return res.status(500).send({status:false,message:error.message||"An error occurred"});
   }
 });
 
 // -----------------RESET PASSWORD-------------------------------------------------
-const resetPassword = asyncHandler(async (req, res, next) => {
+const resetPassword = asyncHandler(async (req, res) => {
   try {
     const { password } = req.body;
     const adminId = req.params.adminId;
 
+    if (!password) {
+      return res.status(400).send({status:false,message:"Password is missing"});
+    }
+
     const findAdmin = await Admin.findByPk(adminId);
 
     if (!findAdmin) {
-      return next(new ErrorHandler("admin not found", 404));
-    }
-
-    if (!password) {
-      return next(new ErrorHandler("Password is missing", 400));
+      return res.status(404).send({status:false,message:"admin not found"});
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     findAdmin.password = hashedPassword;
@@ -163,7 +164,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
       data: loggedInAdmin,
     });
   } catch (error) {
-    return next(new ErrorHandler("An error occurred", error, 500));
+    returnres.status(500).send({status:false,message:error.message||"An error occurred"});
   }
 });
 

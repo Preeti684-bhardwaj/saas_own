@@ -1,15 +1,15 @@
 const db = require("../db/dbConnection");
 const asyncHandler = require("../utils/asyncHandler");
-const errorHandler = require("../utils/errorHandler");
+// const errorHandler = require("../utils/errorHandler");
 const Product = db.products;
 const SubscriptionPlan = db.subscriptionPlans;
 const { validationResult } = require("express-validator");
 
 // Create and Save a new Product
-const createProduct = asyncHandler(async (req, res, next) => {
+const createProduct = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ status:false,errors: errors.array() });
   }
 
   try {
@@ -17,7 +17,7 @@ const createProduct = asyncHandler(async (req, res, next) => {
       where: { name: req.body.name },
     });
     if (existingProduct) {
-      return next(new errorHandler("Product already exist", 400));
+      return res.status(400).send({status:false,message:"Product already exist"});
     }
     const product = await Product.create({
       name: req.body.name,
@@ -27,12 +27,7 @@ const createProduct = asyncHandler(async (req, res, next) => {
     });
     res.status(201).send(product);
   } catch (error) {
-    return next(
-      new errorHandler(
-        error.message || "Some error occurred while creating the Product.",
-        500
-      )
-    );
+    return res.status(500).send({status:false,message:error.message || "Some error occurred while creating the Product."})
   }
 });
 
@@ -65,11 +60,7 @@ const findAllWithSubscriptionPlans = async (req, res) => {
 
     res.send(response);
   } catch (error) {
-    return next(
-      new errorHandler(
-        error.message || "Some error occurred while retrieving products."
-      )
-    );
+    return res.status(500).send({status:false,message:error.message || "Some error occurred while retrieving products."})
   }
 };
 

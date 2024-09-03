@@ -1,7 +1,7 @@
 const db = require("../db/dbConnection.js");
 const Customer = db.customers;
 const asyncHandler = require("../utils/asyncHandler.js");
-const ErrorHandler = require("../utils/errorHandler.js");
+// const ErrorHandler = require("../utils/errorHandler.js");
 const bcrypt = require("bcrypt");
 const { Op } = require("sequelize");
 const sendEmail = require("../utils/sendEmail.js");
@@ -45,15 +45,35 @@ const generateApiKey = () => {
 };
 
 // -----------------CUSTOMER SIGNUP-----------------------------------------------------
-const customerSignup = asyncHandler(async (req, res, next) => {
+const customerSignup = asyncHandler(async (req, res) => {
   try {
     const { name: rawName, phone, email, password } = req.body;
 
     // Validate input fields
-    if (!rawName) return next(new ErrorHandler("Name is missing", 400));
-    if (!phone) return next(new ErrorHandler("Phone is missing", 400));
-    if (!email) return next(new ErrorHandler("Email is missing", 400));
-    if (!password) return next(new ErrorHandler("Password is missing", 400));
+    if (!rawName){
+      return res.status(400).send({
+        success: false,
+        message: "Name is missing",
+      });
+    }
+    if (!phone){
+      return res.status(400).send({
+        success: false,
+        message: "Phone is missing",
+      });
+    } 
+    if (!email){
+      return res.status(400).send({
+        success: false,
+        message: "Email is missing",
+      });
+    }
+    if (!password){
+      return res.status(400).send({
+        success: false,
+        message: "Password is missing",
+      });
+    }
 
     // Sanitize name: trim and reduce multiple spaces to a single space
     const name = rawName.trim().replace(/\s+/g, " ");
@@ -135,17 +155,14 @@ const customerSignup = asyncHandler(async (req, res, next) => {
       customerId: customer.id,
     });
   } catch (error) {
-    return next(
-      new ErrorHandler(
-        error.message || "Some error occurred during signup.",
-        500
-      )
-    );
+    return res
+    .status(500)
+    .send({ success: false, message:error.message || "Some error occurred during signup."});
   }
 });
 
 // ----------------send otp-----------------------------
-const sendOtp = asyncHandler(async (req, res, next) => {
+const sendOtp = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -277,7 +294,7 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
   }
 });
 // -----------------CUSTOMER SIGNIN-----------------------------------------------------
-const customerSignin = asyncHandler(async (req, res, next) => {
+const customerSignin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -598,7 +615,9 @@ const deleteUser = asyncHandler(async (req, res, next) => {
       message: `user with phone ${user.phone} deleted successfully`,
     });
   } catch (err) {
-    return next(new ErrorHandler(err.message, 500));
+    return res.status(500).send({
+      success: false,
+      message: err.message});
   }
 });
 
@@ -614,9 +633,12 @@ const getUser = asyncHandler(async (req, res, next) => {
       res.json({ success: true, data: item });
     }
   } catch (error) {
-    return next(new ErrorHandler(error.message, 500));
+    return res.status(500).send({
+      success: false,
+      message: err.message});
   }
 });
+
 module.exports = {
   customerSignup,
   sendOtp,

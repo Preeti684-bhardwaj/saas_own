@@ -9,7 +9,7 @@ const createTransaction = async (data) => {
         const order = await Order.findOne({ where: { 'payment.intentId': data.payment_intent } });
 console.log(data.payment_intent);
         if (!order) {
-            throw new Error('Order not found for the given payment intent');
+            return resizeBy.status(400).send({status:false,message:'Order not found for the given payment intent'});
         }
 
         // Create the transaction with the orderId
@@ -29,10 +29,10 @@ console.log(data.payment_intent);
         });
 
         console.log('Transaction created successfully:', transaction);
-        return transaction;
+        return res.status(201).send({status:true,message:transaction});
     } catch (error) {
         console.error('Error creating transaction:', error);
-        throw new Error('Error creating transaction');
+        return res.status(500).send({status:false,message:error.message||'Error creating transaction'});
     }
 };
 

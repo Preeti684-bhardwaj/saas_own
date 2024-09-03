@@ -10,15 +10,15 @@ const dotenv = require('dotenv').config();
 // const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // createOrder
-const createOrder = asyncHandler(async(req,res,next) => {
+const createOrder = asyncHandler(async(req,res) => {
     const transaction = await db.sequelize.transaction();
     try {
       const {userId,subscription}=req.body
       if(!userId){
-        return next(new ErrorHandler("userId is missing", 400));
+        return res.status(400).send({status:false,message:"userId is missing"});
       }
       if(!subscription){
-        return next(new ErrorHandler("subscription Detail is missing", 400));
+        return res.status(400).send({status:false,message:"subscription Detail is missing"});
       }
       const order = await Order.create({
         customerId: userId,
@@ -32,7 +32,7 @@ const createOrder = asyncHandler(async(req,res,next) => {
     } catch (error) {
       await transaction.rollback();
       console.error("Error creating order:", error);
-      throw new Error("Error creating order");
+      return res.status(500).send({status:false,message:error.message||"Error creating order"})
     }
   });
 // const createOrder = async (customer, data) => {

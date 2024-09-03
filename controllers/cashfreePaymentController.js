@@ -1,11 +1,11 @@
 const { Cashfree } = require("cashfree-pg");
 const dotenv = require("dotenv").config();
 const asyncHandler = require("../utils/asyncHandler");
-const errorHandler = require("../utils/errorHandler");
+// const errorHandler = require("../utils/errorHandler");
 const axios = require("axios");
 const { XClientId, XClientSecret, API_Version, API_URL } = process.env;
 
-const cashfreePayment = asyncHandler(async (req, res, next) => {
+const cashfreePayment = asyncHandler(async (req, res) => {
   try {
     const {
       orderId,
@@ -24,11 +24,10 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
       !userId ||
       !planPrice
     ) {
-      return next(new errorHandler("Missing required fields", 400));
+      return res.status(400).send({status:false,message:"Missing required fields"})
     }
     if (typeof planPrice !== "number" || planPrice <= 0) {
-      return next(
-        new errorHandler("Plan price must be a positive number", 400)
+      returnres.status(400).send({status:false,message:"Plan price must be a positive number"}
       );
     }
     const option = {
@@ -77,20 +76,17 @@ const cashfreePayment = asyncHandler(async (req, res, next) => {
     console.error("Stripe payment error:", error);
 
     if (error.type === "StripeCardError") {
-      return next(new errorHandler(error.message, 400));
+      return res.status(400).send({status:false,message:error.message});
     }
 
-    return next(
-      new errorHandler(
+    return  res.status(500).send({status:false,message:
         error.message ||
           "Some error occurred while creating the Stripe session.",
-        500
-      )
-    );
+    });
   }
 });
 
-const getStatus = asyncHandler(async (req, res, next) => {
+const getStatus = asyncHandler(async (req, res) => {
   // let token = req.cookies.access_token;
   const orderId = req.params.order_id;
   console.log(orderId);
@@ -128,25 +124,25 @@ const getStatus = asyncHandler(async (req, res, next) => {
 });
 
 // get session detail
-const getSessionDetails = asyncHandler(async (req, res, next) => {
+const getSessionDetails = asyncHandler(async (req, res) => {
   try {
     const session_id = req.query.session_id;
 
     if (!session_id) {
-      return next(new errorHandler("Session ID is required", 400));
+      return res.status(400).send({status:false,message: "Session ID is required"});
     }
 
     const session = await stripe.checkout.sessions.retrieve(session_id);
 
     if (!session) {
-      return next(new errorHandler("Session not found", 404));
+      return res.status(404).send({status:false,message:"Session not found"});
     }
 
     console.log(session.metadata);
     res.send(session);
   } catch (error) {
     console.error("Error fetching session details:", error);
-    return next(new errorHandler("Error fetching session details", 500));
+    return res.status(500).send({status:false,message:error.message|| "Error fetching session details"});
   }
 });
 
