@@ -6,20 +6,21 @@ require("dotenv").config({ path: "./.env" });
 const app = express();
 const cors = require("cors");
 // app.use(cookieParser());
-// const allowedOrigins =['https://ai-engage-complete.vercel.app','https://aiengage.xircular.io','https://new-video-editor.vercel.app','http://localhost:3000',undefined ]
+const allowedOrigins =['https://ai-engage-complete.vercel.app','https://aiengage.xircular.io','https://new-video-editor.vercel.app','http://localhost:3000',undefined ]
 
-app.use(cors());
-  // {
-  //   origin: (origin, callback) => {
-  //     console.log("origin coming",origin)
-  //     if (allowedOrigins.includes(origin)) {
-  //       callback(null, true);
-  //     } else {
-  //       callback(new Error('Not allowed by CORS'));
-  //     }
-  //   },
-  //   // credentials: true // Allow cookies to be sent and received
-  // }
+app.use(cors(
+  {
+    origin: (origin, callback) => {
+      console.log("origin coming",origin)
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    // credentials: true // Allow cookies to be sent and received
+  }
+));
 
 
 app.use(express.static("public"));
