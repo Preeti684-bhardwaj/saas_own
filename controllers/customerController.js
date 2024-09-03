@@ -210,7 +210,7 @@ const sendOtp = asyncHandler(async (req, res, next) => {
     }
   } catch (error) {
     console.log(error);
-    return res.status(500).send(error.message);
+    return res.status(500).send(error.message); 
   }
 });
 // ==========================email verification------------------------------
@@ -282,17 +282,21 @@ const customerSignin = asyncHandler(async (req, res, next) => {
 
   try {
     if (!email) {
-      return next(new ErrorHandler("email is missing", 400));
+      return res
+          .status(400)
+          .send({ success: false, message: "email is missing" });
     }
 
     if (!password) {
-      return next(new ErrorHandler("password is missing", 400));
+      return res
+      .status(400)
+      .send({ success: false, message: "password is missing" });
     }
     const customer = await Customer.findOne({ where: { email } });
     if (!customer) {
       return res
-        .status(404)
-        .json({ status: false, message: "Customer not found." });
+      .status(404)
+      .send({ success: false, message: "Customer not found." });
     }
     //if (!customer.IsActivated) {
     //    return res.status(401).json({ message: "Customer not found" });
@@ -304,8 +308,8 @@ const customerSignin = asyncHandler(async (req, res, next) => {
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
       return res
-        .status(400)
-        .json({ status: false, message: "Invalid password." });
+          .status(403)
+          .send({ success: false, message: "Invalid password." });
     }
 
     const obj = {
@@ -319,17 +323,17 @@ const customerSignin = asyncHandler(async (req, res, next) => {
       // Update the customer record with the new API key
       await customer.update({ api_key: apiKey });
     }
-    const options = {
-      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-      httpOnly: false,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-    };
+    // const options = {
+    //   expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+    //   httpOnly: false,
+    //   secure: true,
+    //   sameSite: "none",
+    //   path: "/",
+    // };
     //  generate token
     const token = generateToken(obj);
-    res.cookie("access_token", token, options);
-    console.log("i am from signin", req.cookies);
+    // res.cookie("access_token", token, options);
+    // console.log("i am from signin", req.cookies);
     res.status(200).json({
       success: true,
       message: "login successfully",
@@ -340,12 +344,9 @@ const customerSignin = asyncHandler(async (req, res, next) => {
       // Add additional fields as necessary
     });
   } catch (error) {
-    return next(
-      new ErrorHandler(
-        error.message || "Some error occurred during signin.",
-        500
-      )
-    );
+    return res
+    .status(500)
+    .send({ success: false, message:error.message || "Some error occurred during signin."});
   }
 });
 
