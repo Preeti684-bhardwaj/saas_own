@@ -1,9 +1,11 @@
+require("dotenv").config({path:"./.env"})
+
 const env = {
-  database: 'saas',
-  username: 'saasuser',
-  password: 'saasuser123',
-  host: 'localhost',
-  dialect: 'postgres',
+  database: process.env.DATABASE,
+  username: process.env.USERNAME,
+  password: process.env.PASSWORD,
+  host: process.env.HOST,
+  dialect: process.env.DIALECT,
     // database: 'verceldb',
     // username: 'default',
     // password: '2koNB4jcZbpA',
