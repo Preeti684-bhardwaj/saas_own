@@ -327,7 +327,8 @@ const customerSignin = asyncHandler(async (req, res) => {
       return res.status(401).json({ message: "Email not verified" });
     }
     console.log("password coming",password);
-    console.log("hashing coming password",bcrypt.hash(password, 10))
+    const hashingPassword= await bcrypt.hash(password, 10)
+    console.log("hashing coming password",hashingPassword)
     console.log("logging stored hashed password",customer.password)
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
