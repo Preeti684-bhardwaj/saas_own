@@ -15,6 +15,7 @@ const {
 } = require("../utils/validation.js");
 // const mail = require('../mail/mailgun.js');
 const { validationResult } = require("express-validator");
+const { log } = require("console");
 
 // Helper function to generate JWT
 const generateToken = (user) => {
@@ -50,25 +51,25 @@ const customerSignup = asyncHandler(async (req, res) => {
     const { name: rawName, phone, email, password } = req.body;
 
     // Validate input fields
-    if (!rawName){
+    if (!rawName) {
       return res.status(400).send({
         success: false,
         message: "Name is missing",
       });
     }
-    if (!phone){
+    if (!phone) {
       return res.status(400).send({
         success: false,
         message: "Phone is missing",
       });
-    } 
-    if (!email){
+    }
+    if (!email) {
       return res.status(400).send({
         success: false,
         message: "Email is missing",
       });
     }
-    if (!password){
+    if (!password) {
       return res.status(400).send({
         success: false,
         message: "Password is missing",
@@ -103,7 +104,7 @@ const customerSignup = asyncHandler(async (req, res) => {
     // Check for existing customer with the provided email or phone
     const existingUser = await Customer.findOne({
       where: {
-        [Op.or]: [{ email: lowercaseEmail }, { phone:phone }],
+        [Op.or]: [{ email: lowercaseEmail }, { phone: phone }],
       },
     });
 
@@ -138,7 +139,7 @@ const customerSignup = asyncHandler(async (req, res) => {
         message: passwordValidationResult,
       });
     }
-
+    // const hashedPassword = await bcrypt.hash(password, 10);
     // Generate a verification token
     const emailToken = generateToken({ email: lowercaseEmail });
 
@@ -156,8 +157,11 @@ const customerSignup = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     return res
-    .status(500)
-    .send({ success: false, message:error.message || "Some error occurred during signup."});
+      .status(500)
+      .send({
+        success: false,
+        message: error.message || "Some error occurred during signup.",
+      });
   }
 });
 
@@ -227,7 +231,7 @@ const sendOtp = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res.status(500).send(error.message); 
+    return res.status(500).send(error.message);
   }
 });
 // ==========================email verification------------------------------
@@ -245,12 +249,10 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
     const customer = await Customer.findOne({ where: { email: email.trim() } });
 
     if (!customer) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "Customer not found or invalid details.",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "Customer not found or invalid details.",
+      });
     }
 
     // Validate OTP
@@ -264,13 +266,15 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
 
     // Store the full details after successful email verification
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log("line 268", hashedPassword);
+
     customer.name = name.trim().replace(/\s+/g, " ");
     customer.phone = phone;
     customer.password = hashedPassword;
     customer.isEmailVerified = true;
     customer.otp = null;
     customer.otpExpire = null;
-
+    console.log(customer.password);
     // Save updated customer details
     await customer.save();
 
@@ -300,20 +304,20 @@ const customerSignin = asyncHandler(async (req, res) => {
   try {
     if (!email) {
       return res
-          .status(400)
-          .send({ success: false, message: "email is missing" });
+        .status(400)
+        .send({ success: false, message: "email is missing" });
     }
 
     if (!password) {
       return res
-      .status(400)
-      .send({ success: false, message: "password is missing" });
+        .status(400)
+        .send({ success: false, message: "password is missing" });
     }
     const customer = await Customer.findOne({ where: { email } });
     if (!customer) {
       return res
-      .status(404)
-      .send({ success: false, message: "Customer not found." });
+        .status(404)
+        .send({ success: false, message: "Customer not found." });
     }
     //if (!customer.IsActivated) {
     //    return res.status(401).json({ message: "Customer not found" });
@@ -325,8 +329,8 @@ const customerSignin = asyncHandler(async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
       return res
-          .status(403)
-          .send({ success: false, message: "Invalid password." });
+        .status(400)
+        .send({ success: false, message: "Invalid password." });
     }
 
     const obj = {
@@ -362,8 +366,11 @@ const customerSignin = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     return res
-    .status(500)
-    .send({ success: false, message:error.message || "Some error occurred during signin."});
+      .status(500)
+      .send({
+        success: false,
+        message: error.message || "Some error occurred during signin.",
+      });
   }
 });
 
@@ -617,7 +624,8 @@ const deleteUser = asyncHandler(async (req, res, next) => {
   } catch (err) {
     return res.status(500).send({
       success: false,
-      message: err.message});
+      message: err.message,
+    });
   }
 });
 
@@ -627,11 +635,15 @@ const deleteAllUsers = async (req, res) => {
     await Customer.destroy({
       where: {}, // Empty condition means all records
     });
-    
-    res.status(200).json({ message: 'All users have been deleted successfully.' });
+
+    res
+      .status(200)
+      .json({ message: "All users have been deleted successfully." });
   } catch (error) {
-    console.error('Error deleting users:', error);
-    res.status(500).json({ message: 'An error occurred while deleting users.' });
+    console.error("Error deleting users:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while deleting users." });
   }
 };
 
@@ -649,7 +661,8 @@ const getUser = asyncHandler(async (req, res, next) => {
   } catch (error) {
     return res.status(500).send({
       success: false,
-      message: err.message});
+      message: err.message,
+    });
   }
 });
 
