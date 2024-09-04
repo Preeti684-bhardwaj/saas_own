@@ -265,7 +265,7 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
 
     // Store the full details after successful email verification
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("line 268", hashedPassword);
+    console.log("Hashed Password:", hashedPassword); // Debugging log
 
     customer.name = name.trim().replace(/\s+/g, " ");
     customer.phone = phone;
@@ -276,6 +276,7 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
     console.log(customer.password);
     // Save updated customer details
     await customer.save();
+    console.log("Customer Saved:", customer); // Debugging log
 
     res.status(200).json({
       success: true,
@@ -313,6 +314,7 @@ const customerSignin = asyncHandler(async (req, res) => {
         .send({ success: false, message: "password is missing" });
     }
     const customer = await Customer.findOne({ where: { email } });
+    console.log("Customer Found:", customer); // Debugging log
     if (!customer) {
       return res
         .status(404)
@@ -327,7 +329,7 @@ const customerSignin = asyncHandler(async (req, res) => {
     console.log("password coming", password);
     console.log("logging stored hashed password", customer.password);
     const isPasswordValid = await bcrypt.compare(password, customer.password);
-    console.log("comapare password", isPasswordValid);
+    console.log("Password Valid:", isPasswordValid); // Debugging log
 
     if (!isPasswordValid) {
       return res
