@@ -621,6 +621,20 @@ const deleteUser = asyncHandler(async (req, res, next) => {
   }
 });
 
+// delete all user
+const deleteAllUsers = async (req, res) => {
+  try {
+    await Customer.destroy({
+      where: {}, // Empty condition means all records
+    });
+    
+    res.status(200).json({ message: 'All users have been deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting users:', error);
+    res.status(500).json({ message: 'An error occurred while deleting users.' });
+  }
+};
+
 // get All user
 const getUser = asyncHandler(async (req, res, next) => {
   try {
@@ -648,6 +662,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   freeTrial,
+  deleteAllUsers,
   // logOut,
   deleteUser,
   getUser,

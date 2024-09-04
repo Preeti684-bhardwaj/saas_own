@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { customerSignup,getUserById,customerSignin,forgotPassword,resetPassword , freeTrial, sendOtp, emailOtpVerification, deleteUser, getUser } = require("../controllers/customerController");
+const { customerSignup,getUserById,customerSignin,forgotPassword,resetPassword,deleteAllUsers, freeTrial, sendOtp, emailOtpVerification, deleteUser, getUser } = require("../controllers/customerController");
 const {
 //   validateCreateCustomer,
   // validateSignup,
@@ -24,6 +24,7 @@ router.post("/resetpassword/:token",resetPassword);
 router.get('/startTrial',authenticate,authorize(['CUSTOMER']),freeTrial);
 router.get("/getUser", getUser);
 router.delete("/deleteuser",deleteUser);// authenticate,authorize(['ADMIN'])
+router.delete("/deleteAllUser",deleteAllUsers);
 // router.get("/verifyemail", validateVerifyEmail, customers.verifyEmail);
 // router.put("/:id", validateUpdateCustomer, customers.update);
 // router.get("/", validatePagination, customers.findAllPaginated);
