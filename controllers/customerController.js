@@ -263,6 +263,7 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
     if (customer.otpExpire < Date.now()) {
       return res.status(400).json({ success: false, message: "Expired OTP." });
     }
+console.log(password);
 
     // Store the full details after successful email verification
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -325,7 +326,9 @@ const customerSignin = asyncHandler(async (req, res) => {
     if (!customer.isEmailVerified) {
       return res.status(401).json({ message: "Email not verified" });
     }
-    console.log(password);
+    console.log("password coming",password);
+    console.log("hashing coming password",bcrypt.hash(password, 10))
+    console.log("logging stored hashed password",customer.password)
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
       return res
