@@ -156,12 +156,10 @@ const customerSignup = asyncHandler(async (req, res) => {
       customerId: customer.id,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .send({
-        success: false,
-        message: error.message || "Some error occurred during signup.",
-      });
+    return res.status(500).send({
+      success: false,
+      message: error.message || "Some error occurred during signup.",
+    });
   }
 });
 
@@ -263,7 +261,7 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
     if (customer.otpExpire < Date.now()) {
       return res.status(400).json({ success: false, message: "Expired OTP." });
     }
-console.log(password);
+    console.log(password);
 
     // Store the full details after successful email verification
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -326,11 +324,13 @@ const customerSignin = asyncHandler(async (req, res) => {
     if (!customer.isEmailVerified) {
       return res.status(401).json({ message: "Email not verified" });
     }
-    console.log("password coming",password);
-    const hashingPassword= await bcrypt.hash(password, 10)
-    console.log("hashing coming password",hashingPassword)
-    console.log("logging stored hashed password",customer.password)
+    console.log("password coming", password);
+    const hashingPassword = await bcrypt.hash(password, 10);
+    console.log("hashing coming password", hashingPassword);
+    console.log("logging stored hashed password", customer.password);
     const isPasswordValid = await bcrypt.compare(password, customer.password);
+    console.log("comapare password", isPasswordValid);
+
     if (!isPasswordValid) {
       return res
         .status(400)
@@ -369,12 +369,10 @@ const customerSignin = asyncHandler(async (req, res) => {
       // Add additional fields as necessary
     });
   } catch (error) {
-    return res
-      .status(500)
-      .send({
-        success: false,
-        message: error.message || "Some error occurred during signin.",
-      });
+    return res.status(500).send({
+      success: false,
+      message: error.message || "Some error occurred during signin.",
+    });
   }
 });
 
