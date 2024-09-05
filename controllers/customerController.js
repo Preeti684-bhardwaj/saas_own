@@ -13,9 +13,7 @@ const {
   isValidPassword,
   isValidLength,
 } = require("../utils/validation.js");
-// const mail = require('../mail/mailgun.js');
 const { validationResult } = require("express-validator");
-const { log } = require("console");
 
 // Helper function to generate JWT
 const generateToken = (user) => {
@@ -23,21 +21,13 @@ const generateToken = (user) => {
     expiresIn: "72h", // expires in 24 hours
   });
 };
+
+// OTP validity period in seconds (e.g., 15 minutes)
+const OTP_VALIDITY = 15 * 60;
+
+// Generate OTP
 const generateOtp = () => {
-  // Define the possible characters for the OTP
-  const chars = "0123456789";
-  // Define the length of the OTP
-  const len = 6;
-  let otp = "";
-  // Generate the OTP
-  for (let i = 0; i < len; i++) {
-    otp += chars[Math.floor(Math.random() * chars.length)];
-  }
-
-  this.otp = otp;
-  this.otpExpire = Date.now() + 15 * 60 * 1000;
-
-  return otp;
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 // Helper function to generate API key
@@ -164,120 +154,104 @@ const customerSignup = asyncHandler(async (req, res) => {
 });
 
 // ----------------send otp-----------------------------
+// Send OTP
 const sendOtp = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
-  if (!email) {
-    return res.status(400).send({ message: "Missing email" });
+  if (!email || !isValidEmail(email)) {
+    return res.status(400).send({ message: "Invalid or missing email" });
   }
 
-  if (!isValidEmail(email)) {
-    return res.status(400).send({ message: "Invalid Email" });
-  }
+  const otp = generateOtp();
+  const expirationTime = Date.now() + OTP_VALIDITY * 1000;
+
+  // Create a token with the email, OTP, and expiration time
+  const token = jwt.sign(
+    { 
+      email, 
+      otp,
+      expirationTime
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: `${OTP_VALIDITY}s` }
+  );
+
+  // Create HTML content for the email
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
+      <h2>One-Time Password (OTP) for Verification</h2>
+      <p>Hello,</p>
+      <p>Your One Time Password (OTP) for AI Engage is:</p>
+      <h1 style="font-size: 32px; background-color: #f0f0f0; padding: 10px; display: inline-block;">${otp}</h1>
+      <p>This OTP is valid for 15 minutes.</p>
+      <p>If you didn't request this OTP, please ignore this email.</p>
+      <p>Best regards,<br>AI Engage Team</p>
+    </div>
+  `;
 
   try {
-    // const customer = await Customer.findOne({
-    //   where: {
-    //     email: email.trim(),
-    //   },
-    // });
+    await sendEmail({
+      email: email,
+      subject: `AI Engage: Your One-Time Password (OTP) for Verification`,
+      html: htmlContent,
+    });
 
-    // if (!customer) {
-    //   return res.status(404).send({ message: "Customer not found" });
-    // }
-
-    const otp = generateOtp();
-    // customer.otp = otp;
-    // customer.otpExpire = Date.now() + 15 * 60 * 1000;
-
-    // await customer.save({ validate: false });
-
-    // Create HTML content for the email
-    const htmlContent = `
-  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    <img src="https://stream.xircular.io/AIengage.png" alt="AI Engage Logo" style="max-width: 200px; margin-bottom: 20px;">
-    <h2>One-Time Password (OTP) for Verification</h2>
-    <p>Hello,</p>
-    <p>Your One Time Password (OTP) for AI Engage is:</p>
-    <h1 style="font-size: 32px; background-color: #f0f0f0; padding: 10px; display: inline-block;">${otp}</h1>
-    <p>This OTP is valid for 15 minutes.</p>
-    <p>If you didn't request this OTP, please ignore this email.</p>
-    <p>Best regards,<br>AI Engage Team</p>
-  </div>
-`;
-
-    try {
-      await sendEmail({
-        email: email,
-        subject: `AI Engage: Your One-Time Password (OTP) for Verification`,
-        html: htmlContent,
-      });
-
-      res.status(200).json({
-        success: true,
-        message: `OTP sent to ${email} successfully`,
-        email: email,
-      });
-    } catch (emailError) {
-      // customer.otp = null;
-      // customer.otpExpire = null;
-      // await customer.save({ validate: false });
-
-      console.error("Failed to send OTP email:", emailError);
-      return res.status(500).send(emailError.message);
-    }
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send(error.message);
+    res.status(200).json({
+      success: true,
+      message: `OTP sent to ${email} successfully`,
+      token: token,
+    });
+  } catch (emailError) {
+    console.error("Failed to send OTP email:", emailError);
+    return res.status(500).send(emailError.message);
   }
 });
-// ==========================email verification------------------------------
-const emailOtpVerification = asyncHandler(async (req, res) => {
-  const { email, otp, name, phone, password } = req.body; // Include additional fields
 
-  // Validate required fields
-  if (!email || !otp) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Email and OTP are required." });
+// ==========================email verification------------------------------
+// Email OTP Verification
+const emailOtpVerification = asyncHandler(async (req, res) => {
+  const { token, otp, name, phone, password } = req.body;
+
+  if (!token || !otp) {
+    return res.status(400).json({ success: false, message: "Token and OTP are required." });
   }
 
   try {
-    // const customer = await Customer.findOne({ where: { email: email.trim() } });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const { email, otp: storedOtp, expirationTime } = decoded;
 
-    // if (!customer) {
-    //   return res.status(404).json({
-    //     success: false,
-    //     message: "Customer not found or invalid details.",
-    //   });
-    // }
+    // Check if OTP has expired
+    if (Date.now() > expirationTime) {
+      return res.status(400).json({ success: false, message: "OTP has expired." });
+    }
 
-    // Validate OTP
-    // if (customer.otp !== otp) {
-    //   return res.status(400).json({ success: false, message: "Invalid OTP" });
-    // }
+    // Verify OTP
+    if (otp !== storedOtp) {
+      return res.status(400).json({ success: false, message: "Invalid OTP." });
+    }
 
-    // if (customer.otpExpire < Date.now()) {
-    //   return res.status(400).json({ success: false, message: "Expired OTP." });
-    // }
-    console.log(password);
-    // Convert the email to lowercase for case-insensitive comparison
+    // OTP is valid, proceed with user verification or registration
     const lowercaseEmail = email.toLowerCase();
 
-    // Store the full details after successful email verification
-    const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Hashed Password:", hashedPassword); // Debugging log
+    // Check if user already exists
+    let customer = await Customer.findOne({ where: { email: lowercaseEmail } });
 
-    const customer = await Customer.create({
-      name:name.trim().replace(/\s+/g, " "),
-      phone : phone,
-      email: lowercaseEmail,
-      password : hashedPassword,
-      isEmailVerified : true,
-      //   emailToken,
-      //   isEmailVerified: false, // Set verified status to false
+    if (customer) {
+      // Update existing customer
+      customer.isEmailVerified = true;
+      await customer.save();
+    } else {
+      // Create new customer
+      const hashedPassword = await bcrypt.hash(password, 10);
+      customer = await Customer.create({
+        name: name.trim().replace(/\s+/g, " "),
+        phone: phone,
+        email: lowercaseEmail,
+        password: hashedPassword,
+        isEmailVerified: true,
       });
- // Debugging log
+    }
 
     res.status(200).json({
       success: true,
