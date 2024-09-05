@@ -211,10 +211,10 @@ const sendOtp = asyncHandler(async (req, res) => {
 // ==========================email verification------------------------------
 // Email OTP Verification
 const emailOtpVerification = asyncHandler(async (req, res) => {
-  const { token, Otp, name, phone, password } = req.body;
-
+  const {Otp, name, phone, password } = req.body;
+  const token = req.headers["token"];
   if (!token || !Otp) {
-    return res.status(400).json({ success: false, message: "Token and OTP are required." });
+    return res.status(400).json({ success: false, message: "OTP is required." });
   }
 
   try {
