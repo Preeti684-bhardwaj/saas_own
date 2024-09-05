@@ -218,7 +218,7 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const { email, otp: storedOtp, expirationTime } = decoded;
 
     // Check if OTP has expired
