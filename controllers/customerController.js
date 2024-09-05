@@ -123,12 +123,13 @@ const customerSignup = asyncHandler(async (req, res) => {
             .status(400)
             .send({ message: "Phone number already in use" });
         }
-      } else {
-        // Update the existing user's record with the new email and generate a new verification token
-        existingUser.email = lowercaseEmail;
-        existingUser.emailToken = generateToken({ email: lowercaseEmail });
-        await existingUser.save();
       }
+      //  else {
+      //   // Update the existing user's record with the new email and generate a new verification token
+      //   existingUser.email = lowercaseEmail;
+      //   existingUser.emailToken = generateToken({ email: lowercaseEmail });
+      //   await existingUser.save();
+      // }
     }
 
     // If no existing user found, validate the password and create a new user
@@ -141,19 +142,18 @@ const customerSignup = asyncHandler(async (req, res) => {
     }
     // const hashedPassword = await bcrypt.hash(password, 10);
     // Generate a verification token
-    const emailToken = generateToken({ email: lowercaseEmail });
+    // const emailToken = generateToken({ email: lowercaseEmail });
 
     // Temporarily store minimal data in the Customer table
-    const customer = await Customer.create({
-      email: lowercaseEmail,
-      emailToken,
-      isEmailVerified: false, // Set verified status to false
-    });
+    // const customer = await Customer.create({
+    //   email: lowercaseEmail,
+    //   emailToken,
+    //   isEmailVerified: false, // Set verified status to false
+    // });
 
     res.status(201).send({
       success: true,
-      message: "Signup successful. Please verify your email.",
-      customerId: customer.id,
+      message: "Signup successful. Please verify your email."
     });
   } catch (error) {
     return res.status(500).send({
@@ -176,21 +176,21 @@ const sendOtp = asyncHandler(async (req, res) => {
   }
 
   try {
-    const customer = await Customer.findOne({
-      where: {
-        email: email.trim(),
-      },
-    });
+    // const customer = await Customer.findOne({
+    //   where: {
+    //     email: email.trim(),
+    //   },
+    // });
 
-    if (!customer) {
-      return res.status(404).send({ message: "Customer not found" });
-    }
+    // if (!customer) {
+    //   return res.status(404).send({ message: "Customer not found" });
+    // }
 
     const otp = generateOtp();
-    customer.otp = otp;
-    customer.otpExpire = Date.now() + 15 * 60 * 1000;
+    // customer.otp = otp;
+    // customer.otpExpire = Date.now() + 15 * 60 * 1000;
 
-    await customer.save({ validate: false });
+    // await customer.save({ validate: false });
 
     // Create HTML content for the email
     const htmlContent = `
@@ -208,21 +208,20 @@ const sendOtp = asyncHandler(async (req, res) => {
 
     try {
       await sendEmail({
-        email: customer.email,
+        email: email,
         subject: `AI Engage: Your One-Time Password (OTP) for Verification`,
         html: htmlContent,
       });
 
       res.status(200).json({
         success: true,
-        message: `OTP sent to ${customer.email} successfully`,
-        email: customer.email,
-        customerId: customer.id,
+        message: `OTP sent to ${email} successfully`,
+        email: email,
       });
     } catch (emailError) {
-      customer.otp = null;
-      customer.otpExpire = null;
-      await customer.save({ validate: false });
+      // customer.otp = null;
+      // customer.otpExpire = null;
+      // await customer.save({ validate: false });
 
       console.error("Failed to send OTP email:", emailError);
       return res.status(500).send(emailError.message);
@@ -244,39 +243,41 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
   }
 
   try {
-    const customer = await Customer.findOne({ where: { email: email.trim() } });
+    // const customer = await Customer.findOne({ where: { email: email.trim() } });
 
-    if (!customer) {
-      return res.status(404).json({
-        success: false,
-        message: "Customer not found or invalid details.",
-      });
-    }
+    // if (!customer) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: "Customer not found or invalid details.",
+    //   });
+    // }
 
     // Validate OTP
-    if (customer.otp !== otp) {
-      return res.status(400).json({ success: false, message: "Invalid OTP" });
-    }
+    // if (customer.otp !== otp) {
+    //   return res.status(400).json({ success: false, message: "Invalid OTP" });
+    // }
 
-    if (customer.otpExpire < Date.now()) {
-      return res.status(400).json({ success: false, message: "Expired OTP." });
-    }
+    // if (customer.otpExpire < Date.now()) {
+    //   return res.status(400).json({ success: false, message: "Expired OTP." });
+    // }
     console.log(password);
+    // Convert the email to lowercase for case-insensitive comparison
+    const lowercaseEmail = email.toLowerCase();
 
     // Store the full details after successful email verification
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log("Hashed Password:", hashedPassword); // Debugging log
 
-    customer.name = name.trim().replace(/\s+/g, " ");
-    customer.phone = phone;
-    customer.password = hashedPassword;
-    customer.isEmailVerified = true;
-    customer.otp = null;
-    customer.otpExpire = null;
-    console.log(customer.password);
-    // Save updated customer details
-    await customer.save();
-    console.log("Customer Saved:", customer); // Debugging log
+    const customer = await Customer.create({
+      name:name.trim().replace(/\s+/g, " "),
+      phone : phone,
+      email: lowercaseEmail,
+      password : hashedPassword,
+      isEmailVerified : true,
+      //   emailToken,
+      //   isEmailVerified: false, // Set verified status to false
+      });
+ // Debugging log
 
     res.status(200).json({
       success: true,
