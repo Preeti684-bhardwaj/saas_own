@@ -213,7 +213,10 @@ const sendOtp = asyncHandler(async (req, res) => {
 const emailOtpVerification = asyncHandler(async (req, res) => {
   const {Otp, name, phone, password } = req.body;
   const token = req.headers["token"];
-  if (!token || !Otp) {
+  if(!token ){
+    return res.status(400).json({ success: false, message: "Token is required." });
+  } 
+  if (!Otp) {
     return res.status(400).json({ success: false, message: "OTP is required." });
   }
 
