@@ -389,7 +389,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     await customer.save({ validate: false });
 
-    const resetUrl = `https://ai-engage-complete.vercel.app/SignIn/resetPassword/${resetToken}`;
+    const resetUrl = `https://aiengage.xircular.io/SignIn/resetPassword/${resetToken}`;
 
     // Create HTML content for the email
     const htmlContent = `
