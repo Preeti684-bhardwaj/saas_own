@@ -211,15 +211,15 @@ const sendOtp = asyncHandler(async (req, res) => {
 // ==========================email verification------------------------------
 // Email OTP Verification
 const emailOtpVerification = asyncHandler(async (req, res) => {
-  const { token, otp, name, phone, password } = req.body;
+  const { token, Otp, name, phone, password } = req.body;
 
-  if (!token || !otp) {
+  if (!token || !Otp) {
     return res.status(400).json({ success: false, message: "Token and OTP are required." });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { email, otp: storedOtp, expirationTime } = decoded;
+    const { email, otp, expirationTime } = decoded;
 
     // Check if OTP has expired
     if (Date.now() > expirationTime) {
@@ -227,7 +227,7 @@ const emailOtpVerification = asyncHandler(async (req, res) => {
     }
 
     // Verify OTP
-    if (otp !== storedOtp) {
+    if (Otp !== otp) {
       return res.status(400).json({ success: false, message: "Invalid OTP." });
     }
 
