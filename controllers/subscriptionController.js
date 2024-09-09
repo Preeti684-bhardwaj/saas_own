@@ -45,36 +45,46 @@ const asyncHandler = require('../utils/asyncHandler');
 //     throw new Error('Error creating or updating subscription');
 //   }
 // };
-const createSubscriptionWithoutWebhook=asyncHandler(async (req, res) => {
+const createSubscriptionWithoutWebhook = asyncHandler(async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
-    const {userId,features,frequency ,plan, price}=req.body
+    let { userId, features, frequency, plan, price } = req.body;
     const startDate = new Date();
     const endDate = calculateEndDate(startDate, frequency);
-     features=JSON.parse(features)
-    const subscription = await Subscription.create({
-      customerId:userId,
-      frequency,
-      plan,
-      features,
-      // status: 'active',
-      startDate,
-      endDate,
-      price:price/100,
-    },{transaction});
-    Customer.update(
+
+    // Check if `features` is a string, and parse it only if it is.
+    if (typeof features === 'string') {
+      features = JSON.parse(features);
+    }
+
+    const subscription = await Subscription.create(
       {
-        isSubscribed:true,
-        trialStartDate:null,
-        trialEndDate:null,
-        isTrialActive:false
+        customerId: userId,
+        frequency,
+        plan,
+        features,
+        startDate,
+        endDate,
+        price: price / 100,
+      },
+      { transaction }
+    );
+
+    await Customer.update(
+      {
+        isSubscribed: true,
+        trialStartDate: null,
+        trialEndDate: null,
+        isTrialActive: false,
       },
       {
-        where:{
-          id:userId
-        }
-      }
-    ,{transaction})
+        where: {
+          id: userId,
+        },
+      },
+      { transaction }
+    );
+
     await transaction.commit();
     console.log('Subscription created or updated successfully:', subscription);
     return subscription;
@@ -84,6 +94,7 @@ const createSubscriptionWithoutWebhook=asyncHandler(async (req, res) => {
     throw new Error('Error creating or updating subscription');
   }
 });
+
 
 // get subscription of a customer 
 const getSubscription = asyncHandler(async (req, res) => {
