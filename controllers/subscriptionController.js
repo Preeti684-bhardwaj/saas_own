@@ -168,7 +168,7 @@ const FindBysubscriptions = async (req, res) => {
 // console.log(req.decodedToken.obj.obj.id);
   try {
     const id=req.decodedToken.obj.obj.id
-    const subscriptions = await Customer.findOne({
+    const subscriptions = await Customer.findAll({
       where: {
         id: req.decodedToken.obj.obj.id
       },
