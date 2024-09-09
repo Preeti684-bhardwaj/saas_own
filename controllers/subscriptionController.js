@@ -87,7 +87,7 @@ const createSubscriptionWithoutWebhook = asyncHandler(async (req, res) => {
 
     await transaction.commit();
     console.log('Subscription created or updated successfully:', subscription);
-    return subscription;
+    return res.status(200).json({status:true,data:subscription})
   } catch (error) {
     await transaction.rollback();
     console.error('Error creating or updating subscription:', error);
