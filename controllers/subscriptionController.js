@@ -5,8 +5,48 @@ const calculateEndDate = require('../utils/endDateConfigure');
 const asyncHandler = require('../utils/asyncHandler');
 
 // stripe webhook data of subscription of customer
-const createSubscription = async (userId,features,frequency ,plan, price) => {
-  console.log(features);
+// const createSubscription = async (userId,features,frequency ,plan, price) => {
+//   console.log(features);
+//   const transaction = await db.sequelize.transaction();
+//   try {
+//     const startDate = new Date();
+//     const endDate = calculateEndDate(startDate, frequency);
+//      features=JSON.parse(features)
+//     const subscription = await Subscription.create({
+//       customerId:userId,
+//       frequency,
+//       plan,
+//       features,
+//       // status: 'active',
+//       startDate,
+//       endDate,
+//       price:price/100,
+//     },{transaction});
+//     Customer.update(
+//       {
+//         isSubscribed:true,
+//         trialStartDate:null,
+//         trialEndDate:null,
+//         isTrialActive:false
+//       },
+//       {
+//         where:{
+//           id:userId
+//         }
+//       }
+//     ,{transaction})
+
+//     await transaction.commit();
+//     console.log('Subscription created or updated successfully:', subscription);
+//     return subscription;
+//   } catch (error) {
+//     await transaction.rollback();
+//     console.error('Error creating or updating subscription:', error);
+//     throw new Error('Error creating or updating subscription');
+//   }
+// };
+const createSubscriptionWithoutWebhook=asyncHandler(async (req, res) => {
+  const {userId,features,frequency ,plan, price}=req.body
   const transaction = await db.sequelize.transaction();
   try {
     const startDate = new Date();
@@ -44,7 +84,7 @@ const createSubscription = async (userId,features,frequency ,plan, price) => {
     console.error('Error creating or updating subscription:', error);
     throw new Error('Error creating or updating subscription');
   }
-};
+});
 
 // get subscription of a customer 
 const getSubscription = asyncHandler(async (req, res) => {
@@ -179,7 +219,8 @@ console.log(subscriptions);
 };
 
 module.exports = {
-  createSubscription,
+  // createSubscription,
+  createSubscriptionWithoutWebhook,
   getSubscription,
   FindBysubscriptions,
   FindBysubscriptionsBYApiKey
