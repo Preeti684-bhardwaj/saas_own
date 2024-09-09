@@ -5,7 +5,6 @@ const {authenticate,authorize,authenticateByApiKey}=require('../middlewares/auth
 // const {getSubscription}=require('../controllers/subscriptionController')
 const {FindBysubscriptions, FindBysubscriptionsBYApiKey}=require('../controllers/subscriptionController')
 // const {validateSubscriptionPlanCreation} = require('../utils/validation');
-
 // router.post('/createSubscription',authenticate,authorize(['ADMIN']),validateSubscriptionPlanCreation,createSubscription);
 // router.get('/getSubscription',authenticate,authorize(['ADMIN','CUSTOMER']),getSubscription)
 router.get('/getCustomerSubscription',authenticate,authorize(['ADMIN','CUSTOMER']),FindBysubscriptions)
