@@ -46,9 +46,9 @@ const asyncHandler = require('../utils/asyncHandler');
 //   }
 // };
 const createSubscriptionWithoutWebhook=asyncHandler(async (req, res) => {
-  const {userId,features,frequency ,plan, price}=req.body
   const transaction = await db.sequelize.transaction();
   try {
+    const {userId,features,frequency ,plan, price}=req.body
     const startDate = new Date();
     const endDate = calculateEndDate(startDate, frequency);
      features=JSON.parse(features)

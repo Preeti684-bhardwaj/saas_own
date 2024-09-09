@@ -6,7 +6,7 @@ require("dotenv").config({ path: "./.env" });
 const app = express();
 const cors = require("cors");
 // app.use(cookieParser());
-const allowedOrigins =['https://ai-engage-complete.vercel.app','https://aiengage.xircular.io','https://new-video-editor.vercel.app','http://localhost:3000',undefined ]
+const allowedOrigins =['https://ai-engage-complete.vercel.app','https://aiengage.xircular.io','https://new-video-editor.vercel.app','http://localhost:3000', undefined ]
 
 app.use(cors(
   {
