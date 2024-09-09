@@ -167,6 +167,7 @@ const FindBysubscriptions = async (req, res) => {
   // const { userId} = req.query; // Extract frequency from request body
 // console.log(req.decodedToken.obj.obj.id);
   try {
+    const id=req.decodedToken.obj.obj.id
     const subscriptions = await Customer.findOne({
       where: {
         id: req.decodedToken.obj.obj.id
@@ -184,7 +185,7 @@ console.log("hii i am subscription",subscriptions);
       res.status(200).send(subscriptions);
     } else {
       res.status(404).send({
-        message: `Cannot find any Subscription with userId.`
+        message: `Cannot find any Subscription with userId ${id}.`
       });
     }
   } catch (error) {
